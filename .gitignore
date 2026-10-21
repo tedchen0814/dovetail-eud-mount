@@ -4,3 +4,5 @@ dist/
 .vercel/
 # 參考圖（產品 CAD 截圖）不進 repo
 圖片*.png
+cad/out/
+__pycache__/
