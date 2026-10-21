@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>胸掛 EUD 鳩尾槽提案</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: 工程圖紙感的單頁工具 — 頂部選單（A 軌道／B 鎖定／組合），中段兩張視圖（正視＋剖面）＋播放控制，下段說明卡與比較表 */
+:root {
+  --bg: #ECEEE9;
+  --panel: #F8F9F6;
+  --ink: #1E2523;
+  --muted: #5B6560;
+  --line: #C6CCC5;
+  --plate: #9AA197;
+  --plate-dark: #6C7469;
+  --channel: #555D55;
+  --tablet: #E3B12A;
+  --tablet-dark: #A87F0F;
+  --accent: #CF5320;
+  --float: #1C8781;
+  --metal: #8E98A3;
+  --chip-on: #1E2523;
+  --chip-on-fg: #F8F9F6;
+  --font-display: "Chakra Petch", "Noto Sans TC", system-ui, sans-serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141816; --panel: #1C211F; --ink: #E4E9E5; --muted: #9AA39E; --line: #343C38;
+    --plate: #737B71; --plate-dark: #565E55; --channel: #2F3530;
+    --tablet: #D6A622; --tablet-dark: #F0C24A; --accent: #F07A42; --float: #3FB8B0; --metal: #A5AEB8;
+    --chip-on: #E4E9E5; --chip-on-fg: #141816;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141816; --panel: #1C211F; --ink: #E4E9E5; --muted: #9AA39E; --line: #343C38;
+  --plate: #737B71; --plate-dark: #565E55; --channel: #2F3530;
+  --tablet: #D6A622; --tablet-dark: #F0C24A; --accent: #F07A42; --float: #3FB8B0; --metal: #A5AEB8;
+  --chip-on: #E4E9E5; --chip-on-fg: #141816;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 22px;
+}
+header { display: grid; gap: 6px; }
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+h1 { margin: 0; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.25; text-wrap: balance; font-weight: 700; }
+.lede { margin: 0; color: var(--muted); max-width: 70ch; }
+.lede b { color: var(--ink); font-weight: 500; }
+
+.picker { display: grid; gap: 10px; }
+.pgroup { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pgroup .glabel {
+  font-family: var(--font-display); font-size: 12px; letter-spacing: .08em; color: var(--muted);
+  width: 108px; flex: none;
+}
+.chip {
+  font: inherit; font-size: 14px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  display: inline-flex; gap: 6px; align-items: baseline;
+}
+.chip .n { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-fg); border-color: var(--chip-on); }
+.chip.star .n::after { content: " ★"; color: var(--accent); }
+.chip[aria-pressed="true"].star .n::after { color: var(--accent); }
+.chip:focus-visible, .btn:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.stage {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+.views { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 14px; }
+.view { min-width: 0; display: grid; gap: 4px; align-content: start; }
+.vtitle { font-family: var(--font-display); font-size: 12px; letter-spacing: .08em; color: var(--muted); }
+.view svg { width: 100%; height: auto; display: block; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn {
+  font: inherit; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--ink); background: var(--ink); color: var(--panel);
+  padding: 7px 16px; border-radius: 6px; cursor: pointer;
+}
+.btn.ghost { background: transparent; color: var(--ink); }
+.scrub { flex: 1 1 220px; display: flex; gap: 10px; align-items: center; min-width: 0; }
+.scrub input { flex: 1; min-width: 0; accent-color: var(--accent); }
+.scrub span { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.steps { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+.steps li { display: flex; gap: 6px; align-items: baseline; color: var(--muted); }
+.steps li .k {
+  font-family: var(--font-display); font-weight: 600; font-size: 12px;
+  border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-variant-numeric: tabular-nums;
+}
+.steps li.done { color: var(--ink); }
+.steps li.active { color: var(--accent); font-weight: 500; }
+.steps li.active .k { border-color: var(--accent); }
+.note { font-size: 12.5px; color: var(--muted); }
+
+.info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 28px; }
+.info h2 { margin: 0; font-size: 21px; line-height: 1.35; text-wrap: balance; grid-column: 1 / -1; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.info h2 .tag { font-family: var(--font-display); font-size: 12px; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+.info .meta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px; color: var(--muted); }
+.info .meta b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.info section { min-width: 0; }
+.info h3 { margin: 0 0 4px; font-size: 13px; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+.info p { margin: 0; max-width: 62ch; }
+.info ul { margin: 0; padding-left: 1.2em; }
+.info .wide { grid-column: 1 / -1; }
+.combo-parts { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.tables { display: grid; gap: 18px; }
+.tables h2 { margin: 0; font-size: 18px; }
+.tscroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 640px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 13px; }
+td.num { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: 0; }
+.dots { letter-spacing: 2px; color: var(--accent); white-space: nowrap; }
+footer { font-size: 12.5px; color: var(--muted); }
+
+/* SVG parts */
+.plate { fill: var(--plate); stroke: var(--plate-dark); stroke-width: 1.5; }
+.channel { fill: var(--channel); }
+.lip { fill: var(--plate); stroke: var(--plate-dark); stroke-width: .8; }
+.hidden-edge { stroke: var(--panel); stroke-width: 1.2; stroke-dasharray: 5 4; fill: none; opacity: .8; }
+.stop { fill: var(--ink); }
+.rod { stroke: var(--plate-dark); stroke-width: 7; stroke-linecap: round; }
+.coil { fill: none; stroke: var(--plate-dark); stroke-width: 1.6; }
+.tbody { fill: var(--tablet); fill-opacity: .2; stroke: var(--tablet-dark); stroke-width: 2; }
+.male { fill: var(--tablet); stroke: var(--tablet-dark); stroke-width: 1.5; opacity: .92; }
+.prail { fill: var(--plate-dark); stroke: var(--ink); stroke-width: 1; }
+.recess { fill: none; stroke: var(--tablet-dark); stroke-width: 1.6; stroke-dasharray: 6 4; }
+.strip { stroke: var(--metal); stroke-width: 4; stroke-linecap: round; }
+.lock-on { fill: var(--accent); stroke: var(--ink); stroke-width: 1; }
+.lock-off { fill: var(--panel); stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 3 2; }
+.linkage { stroke: var(--accent); stroke-width: 2.4; fill: none; stroke-linecap: round; }
+.ring { fill: none; stroke: var(--accent); stroke-width: 3.5; }
+.hole { fill: var(--panel); stroke: var(--tablet-dark); stroke-width: 1.4; stroke-dasharray: 3 2; }
+.jaw { fill: var(--float); fill-opacity: .55; stroke: var(--float); stroke-width: 1.2; }
+.spring { fill: none; stroke: var(--float); stroke-width: 1.8; stroke-linejoin: round; }
+.safety-on { fill: var(--float); stroke: var(--ink); stroke-width: 1; }
+.safety-off { fill: var(--panel); stroke: var(--float); stroke-width: 1.4; }
+.arrow { stroke: var(--ink); stroke-width: 2; fill: none; }
+.arrowhead { fill: var(--ink); }
+.cut { stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 8 4 2 4; }
+.lbl { font-family: var(--font-body); font-size: 13px; fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+.lbl.sm { font-size: 11.5px; }
+.lbl.acc { fill: var(--accent); }
+.lbl.flt { fill: var(--float); }
+.lbl.mut { fill: var(--muted); }
+#front .lbl { font-size: 17px; }
+#front .lbl.sm { font-size: 15px; }
+#section .lbl { font-size: 14px; }
+#section .lbl.sm { font-size: 12.5px; }
+.cutlbl { font-family: var(--font-display); font-weight: 600; font-size: 16px; fill: var(--accent); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; }
+/* section */
+.s-tablet { fill: var(--tablet); fill-opacity: .35; stroke: var(--tablet-dark); stroke-width: 1.5; }
+.s-plate { fill: var(--plate); fill-opacity: .55; stroke: var(--plate-dark); stroke-width: 1.5; }
+.s-void { fill: var(--panel); stroke: var(--plate-dark); stroke-width: 1.2; }
+.s-tvoid { fill: var(--panel); stroke: var(--tablet-dark); stroke-width: 1.2; }
+.s-male { fill: var(--tablet); fill-opacity: .8; stroke: var(--tablet-dark); stroke-width: 1.5; }
+.s-prail { fill: var(--plate); stroke: var(--plate-dark); stroke-width: 1.5; }
+.s-metal { fill: var(--metal); stroke: var(--ink); stroke-width: .8; }
+.s-gap { fill: var(--float); fill-opacity: .25; stroke: none; }
+.hatch-t line { stroke: var(--tablet-dark); stroke-width: 1; opacity: .5; }
+.hatch-p line { stroke: var(--plate-dark); stroke-width: 1; opacity: .6; }
+
+@media (max-width: 860px) {
+  .views { grid-template-columns: minmax(0, 1fr); }
+  .info { grid-template-columns: minmax(0, 1fr); }
+  .pgroup .glabel { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Chest Mount × 5" EUD · Dovetail · 10 proposals</div>
+    <h1>胸掛 EUD 鳩尾槽：10 個結構提案</h1>
+    <p class="lede">選一個提案，按 <b>裝上</b> 或 <b>取出</b> 看動作。左邊是正視圖：面向胸掛翻板裝平板的那一面，平板畫成半透明，看得到後蓋上的軌道；平板<b>由右往左</b>滑入。右邊是 A–A 剖面，看鳩尾的咬合形狀。</p>
+  </header>
+
+  <nav class="picker" aria-label="選擇提案" id="picker"></nav>
+
+  <section class="stage" aria-label="動畫">
+    <div class="views">
+      <div class="view">
+        <div class="vtitle">正視圖 · 面向翻板（平板半透明）</div>
+        <svg id="front" viewBox="30 0 790 350" role="img" aria-label="正視圖動畫"></svg>
+      </div>
+      <div class="view">
+        <div class="vtitle">剖面 A–A · 沿滑動方向看（上緣在左、下緣在右）</div>
+        <svg id="section" viewBox="0 0 420 290" role="img" aria-label="剖面圖"></svg>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-install" type="button">▶ 裝上</button>
+      <button class="btn ghost" id="btn-remove" type="button">◀ 取出</button>
+      <button class="btn ghost" id="btn-pause" type="button">暫停</button>
+      <label class="scrub" for="scrub"><span id="scrub-label">裝上進度</span><input id="scrub" type="range" min="0" max="1000" value="1000"></label>
+    </div>
+    <ol class="steps" id="steps"></ol>
+    <div class="note">示意動畫，非實際比例；虛線表示被遮住的鳩尾倒勾邊。橘色是鎖定件，青色是浮動、彈簧、保險。翻板比平板高，解鎖用的壓片、拉環、按鈕、扳片都放在平板外框外露出的翻板上下緣，戴手套摸得到。</div>
+  </section>
+
+  <section class="stage info" id="info" aria-live="polite"></section>
+
+  <section class="tables">
+    <h2>比較表（概念評估，非實測）</h2>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>#</th><th>A. 軌道結構</th><th>厚度估算</th><th>抗翻轉</th><th>公差容忍度</th><th>裝卸速度</th><th>抗泥沙</th><th>模具／成本</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>單軌長滑軌＋右端舌片</td><td>5～6 mm</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●●</td></tr>
+          <tr><td class="num">2</td><td>單軌＋一體撓性懸臂</td><td>5～6 mm</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●●</td></tr>
+          <tr><td class="num">3</td><td>後蓋內凹母槽＋翻板凸軌</td><td>外凸 0／組合 3～4 mm</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●○○</td><td class="dots">●●○</td></tr>
+          <tr><td class="num">4</td><td>雙軌主從軌 ★</td><td>5～6 mm</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td></tr>
+          <tr><td class="num">5</td><td>外八大鳩尾＋彈簧浮動下爪</td><td>6～8 mm</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●○○</td><td class="dots">●○○</td></tr>
+          <tr><td class="num">6</td><td>雙軌開窗 Drop-in</td><td>5～6 mm</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●○</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>#</th><th>B. 鎖定／補強模組</th><th>厚度</th><th>可靠度</th><th>手套操作</th><th>成本</th></tr></thead>
+        <tbody>
+          <tr><td class="num">7</td><td>中央柱塞＋右端拉環 ★</td><td>6～7 mm（含）</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●●○</td></tr>
+          <tr><td class="num">8</td><td>上下雙鎖舌連動</td><td>6～7 mm（含）</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●○○</td></tr>
+          <tr><td class="num">9</td><td>保險滑栓</td><td>＋1～2 mm</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●●</td></tr>
+          <tr><td class="num">10</td><td>金屬補強軌條／嵌件</td><td>0～＋1 mm</td><td>耐磨 <span class="dots">●●●</span></td><td>—</td><td class="dots">●○○</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>組合</th><th>內容</th><th>適合</th></tr></thead>
+        <tbody>
+          <tr><td class="num">A</td><td>提案 4 雙軌主從軌＋提案 7 中央柱塞拉環（建議主案）</td><td>抗翻轉好、公差好做、右手往右拉就取出</td></tr>
+          <tr><td class="num">B</td><td>提案 2 單軌撓性懸臂＋懸臂後加金屬彈片（低成本）</td><td>零件最少、翻板一次射出</td></tr>
+          <tr><td class="num">C</td><td>提案 5 外八大鳩尾＋彈簧下爪＋提案 8 雙鎖舌＋提案 9 保險滑栓（高可靠）</td><td>振動大、可靠度優先，接受成本與厚度</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Claude 2026-10-21 整理的構想，不是定案設計，也還沒經過驗證。厚度為概念估算。本頁只看鳩尾槽結構，不含材料、衝擊、斷面尺寸、模具脫模等製造與測試議題。</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- 資料 ---------- */
+  const ITEMS = [
+    { id: "p1", no: "1", group: "A", tag: "A · 軌道結構", name: "單軌長滑軌＋右端彈簧舌片",
+      cfg: { rails: "single", lock: "tongue" }, thick: "約 5～6 mm",
+      struct: "後蓋中央一條水平 45° 公軌（可做到 60～80 mm 長），翻板中央母槽，左端擋塊，右端一片彈簧舌片。",
+      lockText: "平板推到左端擋塊時，舌片自動彈起擋住公軌右端；拇指壓下舌片，平板往右拉出。選配：公軌左端加薄舌、翻板左端加罩蓋，加強左端抗翹起。",
+      pros: ["最簡單，零件少", "單軌沒有兩軌間距公差問題"],
+      cons: ["抗翻轉只靠軌道寬度，力臂比雙軌短"],
+      fit: "先做可用樣品、要壓低成本。" },
+    { id: "p2", no: "2", group: "A", tag: "A · 軌道結構", name: "單軌＋一體撓性懸臂自扣",
+      cfg: { rails: "single", lock: "cantilever" }, thick: "約 5～6 mm",
+      struct: "翻板母槽下側唇緣的右段做成撓性懸臂，懸臂尾端有扣爪，和翻板一體成形。",
+      lockText: "公軌滑過時把懸臂往下壓開；滑到底後懸臂彈回，扣爪擋住公軌右端。往下扳懸臂舌片解鎖。",
+      pros: ["零件最少，翻板一次成形", "沒有彈簧、銷可以掉"],
+      cons: ["懸臂長期受力會潛變、低溫變脆，可在懸臂後加金屬彈片分擔"],
+      fit: "大量生產、成本敏感。" },
+    { id: "p3", no: "3", group: "A", tag: "A · 軌道結構", name: "後蓋內凹母槽＋翻板凸軌",
+      cfg: { rails: "recess", lock: "tongue" }, thick: "平板外凸 0 mm／組合約 3～4 mm",
+      struct: "公母反過來：後蓋中央做成內凹鳩尾槽（兩端開放），翻板做凸出的公軌。",
+      lockText: "鎖定件放在翻板端：凸軌上的舌片在平板到位時彈進後蓋凹槽頂面的缺口。",
+      pros: ["最薄", "平板拿下來背面是平的，手持、放口袋都不卡"],
+      cons: ["凹槽會吃掉後蓋內側約 3 mm 空間", "凹槽兩端要開放，否則積沙"],
+      fit: "平板拿下來手持時間長，或要放進口袋、袋子。" },
+    { id: "p4", no: "4", group: "A", tag: "A · 軌道結構", star: true, name: "雙軌主從軌",
+      cfg: { rails: "dualMS", lock: "tongue" }, thick: "約 5～6 mm",
+      struct: "後蓋上緣、下緣各一條水平軌。上軌是完整 45° 鳩尾，負責定位；下軌只做朝下的單斜面擋邊，和翻板之間留浮動間隙。",
+      lockText: "動畫用上軌右端舌片示意；建議改搭提案 7 的中央柱塞＋拉環（就是組合 A）。",
+      pros: ["兩軌相距約 60 mm，抗翻轉力矩大", "只有上軌定位，不會過度拘束，公差好做", "兩軌中間空出來放鎖定機構"],
+      cons: ["上軌承受大部分負載，要做得比下軌結實", "下緣有一點浮動，可加小彈片消除晃動感"],
+      fit: "建議的主要方案。" },
+    { id: "p5", no: "5", group: "A", tag: "A · 軌道結構", name: "雙軌外八大鳩尾＋彈簧浮動下爪",
+      cfg: { rails: "splay", lock: "tongue" }, thick: "約 6～8 mm",
+      struct: "上軌只有朝上的斜面、下軌只有朝下的斜面，合起來等於一個寬約 60 mm、中間挖空的大鳩尾。翻板上爪固定，下爪可以上下移動。",
+      lockText: "金屬彈簧把下爪往上推，持續把平板壓向上爪；右端舌片止退。",
+      pros: ["零間隙、不晃", "同時吸收兩軌間距公差與材料差異", "抗翻轉最好"],
+      cons: ["零件多", "彈簧預壓要大於衝擊時的分離力", "下爪滑槽要防沙"],
+      fit: "振動大的平台，或兩邊材料不同。" },
+    { id: "p6", no: "6", group: "A", tag: "A · 軌道結構", name: "雙軌開窗 Drop-in＋短行程",
+      cfg: { rails: "window", lock: "tongue" }, thick: "約 5～6 mm",
+      struct: "翻板上下導軌的唇緣開出窗口，後蓋公軌對應分段。",
+      lockText: "平板直接貼上翻板、公軌段對準窗口壓入，再往左推約 15～20 mm，公軌段移到唇緣下方咬合；右端舌片止退。",
+      pros: ["戴手套最好裝，不用對準軌道端口", "分段之間可以排泥"],
+      cons: ["窗口邊緣是應力集中點", "上下窗口要同時對準，平板要放正"],
+      fit: "重視盲操、快速安裝。" },
+    { id: "p7", no: "7", group: "B", tag: "B · 鎖定模組", star: true, name: "中央彈簧柱塞＋右端拉環",
+      cfg: { rails: "dualMS", lock: "plunger" }, thick: "約 6～7 mm（含軌道）",
+      struct: "翻板中央（雙軌時在兩軌之間）裝一顆彈簧柱塞，後蓋對應位置有定位孔；柱塞由翻板內的拉桿連到右端拉環。動畫以提案 4 的雙軌為底。",
+      lockText: "滑到底時柱塞自動彈進定位孔；往右拉拉環，柱塞縮回，平板順勢往右拉出：解鎖和取出是同一個方向的動作。",
+      pros: ["戴手套好操作", "柱塞藏在平板下方，不會被勾到", "軌道和鎖定分開設計，各自好優化"],
+      cons: ["單點鎖定，剪力集中在柱塞與定位孔，孔周圍要加厚或放金屬襯套"],
+      fit: "建議的主要鎖定方式。" },
+    { id: "p8", no: "8", group: "B", tag: "B · 鎖定模組", name: "上下雙鎖舌連動（單一按鈕）",
+      cfg: { rails: "dualMS", lock: "dualTongue" }, thick: "約 6～7 mm（含軌道）",
+      struct: "翻板上、下導軌右端各一片彈簧鎖舌，由翻板內的連桿接到右端同一個按鈕。動畫以提案 4 的雙軌為底。",
+      lockText: "推到底時上下鎖舌各自彈起；按一個按鈕，兩片同時縮回。",
+      pros: ["兩個獨立鎖點，一個失效另一個仍擋住", "上下同時擋，平板不會歪斜"],
+      cons: ["連桿零件多、成本高", "兩片鎖舌要同時到位，公差要算好"],
+      fit: "搭配雙軌（提案 4、5、6），可靠度要求最高。" },
+    { id: "p9", no: "9", group: "B", tag: "B · 鎖定模組", name: "自動鎖舌＋手動保險滑栓",
+      cfg: { rails: "single", lock: "tongue", safety: true }, thick: "主鎖之外約＋1～2 mm",
+      struct: "主鎖是任一自動鎖（舌片、柱塞或懸臂扣）；副鎖是主鎖旁的手動滑栓。動畫以提案 1 的單軌為底。",
+      lockText: "裝上時主鎖自動鎖上，再用拇指推上滑栓頂住主鎖。取出時先撥下滑栓，再解主鎖。",
+      pros: ["主鎖被裝備或泥塊誤壓也不會脫出", "可以加在任何提案上"],
+      cons: ["取出多一個動作", "滑栓要夠大，戴手套才撥得動"],
+      fit: "任何提案的加購選項。" },
+    { id: "p10", no: "10", group: "B", tag: "B · 補強模組", name: "金屬補強軌條／嵌件",
+      cfg: { rails: "dualMS", lock: "tongue", metal: true }, thick: "0～＋1 mm",
+      struct: "在後蓋公軌的磨耗面埋入不鏽鋼或鋁合金軌條（嵌件成形），或做成獨立軌條鎖在後蓋上。動畫以提案 4 的雙軌為底，灰色條是金屬。",
+      lockText: "不影響鎖定方式，任何鎖都可以搭配。",
+      pros: ["解決塑膠對塑膠的磨耗", "鎖附式軌條磨壞可以單獨更換", "金屬斜面強度高，鳩尾可以做小"],
+      cons: ["成本增加", "嵌件和塑膠的結合要設計，否則衝擊時會鬆脫"],
+      fit: "反覆插拔次數多、長期使用。" }
+  ];
+  const COMBOS = [
+    { id: "ca", no: "A", name: "組合 A：雙軌主從軌＋中央柱塞拉環", tag: "建議主案", parts: ["p4", "p7"],
+      cfg: { rails: "dualMS", lock: "plunger" }, thick: "約 6～7 mm",
+      text: "上軌完整鳩尾定位、下軌單斜面浮動，兩軌中間放柱塞。裝上時一路推到底就自動鎖；取出時右手拉拉環，柱塞縮回、平板同時往右出來。",
+      fit: "抗翻轉好、公差好做，操作最直覺。" },
+    { id: "cb", no: "B", name: "組合 B：單軌撓性懸臂＋金屬彈片", tag: "低成本", parts: ["p2"],
+      cfg: { rails: "single", lock: "cantilever", spring: true }, thick: "約 5～6 mm",
+      text: "翻板一體成形的懸臂扣住公軌，懸臂後面加一片金屬彈片分擔預壓，減少塑膠潛變造成的鬆弛。",
+      fit: "零件最少、翻板一次成形。" },
+    { id: "cc", no: "C", name: "組合 C：外八大鳩尾＋雙鎖舌＋保險滑栓", tag: "高可靠", parts: ["p5", "p8", "p9"],
+      cfg: { rails: "splay", lock: "dualTongue", safety: true }, thick: "約 7～9 mm",
+      text: "彈簧下爪讓平板零間隙；上下兩片鎖舌由同一個按鈕控制；按鈕旁再加保險滑栓，推上後按鈕按不下去。",
+      fit: "振動大、可靠度優先，接受成本與厚度。" }
+  ];
+  const ALL = ITEMS.concat(COMBOS);
+  const byId = Object.fromEntries(ALL.map(x => [x.id, x]));
+
+  /* ---------- 幾何（正視圖座標） ---------- */
+  const D = 316;          // 滑出距離
+  const S = 45;           // 開窗行程
+  const PLANE = 330;      // A–A 剖面位置
+  const TAB = { x: 140, y: 80, w: 360, h: 200 };
+  const CH = {            // 翻板母槽
+    single: [{ y1: 160, y2: 200 }],
+    dual: [{ y1: 90, y2: 114 }, { y1: 246, y2: 270 }]
+  };
+  const WIN_SEGS = [[214, 259], [304, 349], [394, 430]];
+
+  function maleRails(cfg) {
+    switch (cfg.rails) {
+      case "single": return [{ y1: 165, y2: 195, segs: [[214, 424]] }];
+      case "recess": return [];
+      case "window": return [{ y1: 94, y2: 110, segs: WIN_SEGS }, { y1: 250, y2: 266, segs: WIN_SEGS }];
+      default: return [{ y1: 94, y2: 110, segs: [[214, 430]] }, { y1: 250, y2: 266, segs: [[214, 430]] }];
+    }
+  }
+  function tonguePos(cfg) {
+    if (cfg.rails === "single") return [{ x: 427, y: 168, w: 12, h: 24 }];
+    if (cfg.rails === "recess") return [{ x: 404, y: 171, w: 12, h: 18 }];
+    const top = { x: 432, y: 95, w: 10, h: 14 };
+    if (cfg.lock === "dualTongue") return [top, { x: 432, y: 251, w: 10, h: 14 }];
+    return [top];
+  }
+
+  /* ---------- 時間軸 ---------- */
+  const clamp = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const ease = t => { t = clamp(t); return t * t * (3 - 2 * t); };
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+
+  function overlaps(a1, a2, b1, b2) { return a1 < b2 && b1 < a2; }
+  function passiveOpen(cfg, off, z) {
+    if (z > 0.05 || off < 1.2) return 0;
+    if (cfg.lock === "plunger") return overlaps(TAB.x + off, TAB.x + TAB.w + off, 320, 340) ? 1 : 0;
+    if (cfg.rails === "recess") return overlaps(TAB.x + off, TAB.x + TAB.w + off, 404, 416) ? 1 : 0;
+    const lx1 = cfg.lock === "cantilever" ? 426 : 427, lx2 = lx1 + 12;
+    const rails = maleRails(cfg);
+    for (const r of rails) for (const s of r.segs) if (overlaps(s[0] + off, s[1] + off, lx1, lx2)) return 1;
+    return 0;
+  }
+  function installState(t, cfg) {
+    let off, z;
+    if (cfg.rails === "window") { z = 1 - ease(seg(t, 0, 0.35)); off = S * (1 - ease(seg(t, 0.38, 0.72))); }
+    else { z = 0; off = D * (1 - ease(seg(t, 0, 0.72))); }
+    const lockOpen = passiveOpen(cfg, off, z);
+    const safety = cfg.safety ? ease(seg(t, 0.84, 0.96)) : 0;
+    return { off, z, lockOpen, manual: 0, safety };
+  }
+  function removeState(t, cfg) {
+    const safety = cfg.safety ? 1 - ease(seg(t, 0, 0.12)) : 0;
+    const manual = t < 0.86 ? ease(seg(t, 0.14, 0.26)) : 1 - ease(seg(t, 0.86, 0.96));
+    let off, z;
+    if (cfg.rails === "window") { off = S * ease(seg(t, 0.3, 0.56)); z = ease(seg(t, 0.6, 0.84)); }
+    else { off = D * ease(seg(t, 0.3, 0.84)); z = 0; }
+    const lockOpen = Math.max(manual, passiveOpen(cfg, off, z));
+    return { off, z, lockOpen, manual, safety };
+  }
+
+  const LOCK_TXT = {
+    tongue: ["右端舌片自動彈起擋住", "拇指壓下翻板上緣的壓片，舌片縮回"],
+    cantilever: ["懸臂扣爪彈回扣住", "往下扳翻板下緣的扳片"],
+    plunger: ["柱塞彈進後蓋定位孔", "往右拉翻板上緣的拉環，柱塞縮回"],
+    dualTongue: ["上下兩片鎖舌同時彈起", "往左按翻板上緣的按鈕，上下鎖舌一起縮回"]
+  };
+  function stepList(cfg, mode) {
+    const L = LOCK_TXT[cfg.lock];
+    if (mode === "install") {
+      const s = cfg.rails === "window"
+        ? [["把平板貼上翻板，公軌段對準窗口壓入", 0.36], ["往左推約 15～20 mm", 0.72]]
+        : [["對準翻板右端入口", 0.04], ["由右往左滑到左端擋塊", 0.72]];
+      s.push([L[0], 0.82]);
+      if (cfg.safety) s.push(["推上保險滑栓", 0.96]);
+      return s;
+    }
+    const s = [];
+    if (cfg.safety) s.push(["撥下保險滑栓", 0.13]);
+    s.push([L[1], 0.28]);
+    s.push([cfg.rails === "window" ? "往右推，再把平板拉離翻板" : "往右拉出平板", 0.85]);
+    s.push(["鎖扣回到待命位置", 0.97]);
+    return s;
+  }
+
+  /* ---------- SVG 小工具 ---------- */
+  const r = (x, y, w, h, c, ex = "") => `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="${c}" ${ex}/>`;
+  const ln = (x1, y1, x2, y2, c) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${c}"/>`;
+  const pg = (pts, c) => `<polygon points="${pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")}" class="${c}"/>`;
+  const tx = (x, y, s, c = "lbl", a = "start") => `<text x="${x}" y="${y}" class="${c}" text-anchor="${a}">${s}</text>`;
+  function zig(x1, y1, x2, y2, n, amp) {
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const f = i / n, x = x1 + (x2 - x1) * f, y = y1 + (y2 - y1) * f;
+      const side = (i === 0 || i === n) ? 0 : (i % 2 ? amp : -amp);
+      const horiz = Math.abs(x2 - x1) > Math.abs(y2 - y1);
+      pts.push(horiz ? [x, y + side] : [x + side, y]);
+    }
+    return `<polyline points="${pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")}" class="spring"/>`;
+  }
+  function hArrow(x1, x2, y, label) {
+    const dir = x2 < x1 ? 1 : -1;
+    return ln(x1, y, x2, y, "arrow") + pg([[x2, y], [x2 + 9 * dir, y - 5], [x2 + 9 * dir, y + 5]], "arrowhead") +
+      tx((x1 + x2) / 2, y - 7, label, "lbl", "middle");
+  }
+
+  /* ---------- 正視圖 ---------- */
+  function drawFront(cfg, st, mode) {
+    const o = [];
+    const off = st.off, z = st.z;
+    // 翻板與鉸鏈
+    o.push(r(190, 40, 260, 280, "plate", 'rx="14"'));
+    o.push(ln(172, 334, 468, 334, "rod"));
+    for (let x = 226; x <= 300; x += 7) o.push(`<ellipse cx="${x}" cy="334" rx="3" ry="9" class="coil"/>`);
+    o.push(tx(190, 30, "胸掛翻板", "lbl mut"));
+    o.push(tx(478, 339, "鉸鏈＋扭簧", "lbl sm mut"));
+
+    // 母槽
+    const rails = cfg.rails;
+    if (rails === "single") {
+      const c = CH.single[0];
+      o.push(r(206, c.y1, 240, c.y2 - c.y1, "channel"));
+      o.push(r(206, c.y1, 240, 6, "lip"), r(206, c.y2 - 6, 240, 6, "lip"));
+      o.push(ln(206, c.y1 + 6, 446, c.y1 + 6, "hidden-edge"), ln(206, c.y2 - 6, 446, c.y2 - 6, "hidden-edge"));
+      o.push(r(206, c.y1, 8, c.y2 - c.y1, "stop"));
+    } else if (rails === "recess") {
+      o.push(r(206, 165, 230, 30, "prail", 'rx="2"'));
+      o.push(r(206, 165, 8, 30, "stop"));
+      o.push(tx(252, 158, "翻板凸軌", "lbl sm"));
+    } else {
+      CH.dual.forEach((c, i) => {
+        o.push(r(206, c.y1, 240, c.y2 - c.y1, "channel"));
+        const top = i === 0;
+        if (rails === "dualMS" || rails === "window") {
+          // 上軌：雙唇（完整鳩尾）；下軌：只有外側唇（單斜面）
+          const lips = top ? ["in", "out"] : ["out"];
+          const segs = rails === "window" ? WIN_SEGS.map(s => [s[0], s[1] + (s === WIN_SEGS[2] ? 16 : 0)]) : [[206, 446]];
+          lips.forEach(side => {
+            const y = (side === "out") === top ? c.y1 : c.y2 - 5;
+            segs.forEach(s => o.push(r(s[0], y, s[1] - s[0], 5, "lip")));
+          });
+        } else if (rails === "splay") {
+          if (top) o.push(r(206, c.y1, 240, 5, "lip"));
+        }
+        o.push(r(206, c.y1, 8, c.y2 - c.y1, "stop"));
+      });
+      if (rails === "window") {
+        o.push(tx(281, 82, "窗口", "lbl sm mut", "middle"), tx(371, 82, "窗口", "lbl sm mut", "middle"));
+      }
+      if (rails === "dualMS" || rails === "window") {
+        o.push(tx(184, 262, "下軌：單斜面、浮動", "lbl sm flt", "end"));
+        o.push(tx(184, 106, "上軌：完整鳩尾", "lbl sm", "end"));
+      }
+      if (rails === "splay") {
+        // 浮動下爪＋彈簧
+        const tabOver = overlaps(214 + off, 430 + off, 214, 446) && z < 0.05;
+        const jy = tabOver ? 4 : 0;
+        o.push(r(206, 266 + jy, 240, 10, "jaw"));
+        [250, 320, 400].forEach(x => o.push(zig(x, 276 + jy, x, 308, 7, 5)));
+        o.push(ln(200, 308, 450, 308, "arrow"));
+        o.push(tx(184, 300, "彈簧下爪 ↑", "lbl sm flt", "end"));
+      }
+    }
+
+    // 懸臂（在平板下方）
+    if (cfg.lock === "cantilever") {
+      const d = 12 * st.lockOpen;
+      const yb = 200;
+      o.push(`<path d="M340 ${yb} L440 ${yb + d}" class="linkage" style="stroke-width:5"/>`);
+      o.push(pg([[424, yb + d], [440, yb + d], [432, yb + d - 16]], st.lockOpen > 0.5 ? "lock-off" : "lock-on"));
+      if (cfg.spring) o.push(zig(410, yb + d * 0.7 + 3, 410, 236, 6, 4));
+    }
+
+    // 平板
+    const ty = -16 * z;
+    o.push(`<g transform="translate(${off.toFixed(1)} ${ty.toFixed(1)})" opacity="${(1 - 0.35 * z).toFixed(2)}">`);
+    o.push(r(TAB.x, TAB.y, TAB.w, TAB.h, "tbody", 'rx="18"'));
+    if (rails === "recess") {
+      o.push(r(TAB.x, 162, TAB.w, 36, "recess"));
+      o.push(r(404, 168, 12, 24, "hole"));
+    }
+    maleRails(cfg).forEach(m => m.segs.forEach(s => {
+      o.push(r(s[0], m.y1, s[1] - s[0], m.y2 - m.y1, "male", 'rx="1.5"'));
+      if (cfg.metal) o.push(ln(s[0] + 6, (m.y1 + m.y2) / 2, s[1] - 6, (m.y1 + m.y2) / 2, "strip"));
+    }));
+    if (cfg.lock === "plunger") o.push(`<circle cx="330" cy="180" r="9" class="hole"/>`);
+    o.push(tx(TAB.x + 14, rails === "single" ? 266 : rails === "recess" ? 232 : 186, rails === "recess" ? "平板後蓋（凹槽）" : "平板後蓋", "lbl sm mut"));
+    o.push(`</g>`);
+
+    // 鎖定件（畫在平板上方，方便看狀態）
+    // 解鎖操作點一律拉到平板外框之外（翻板上緣或下緣露出的地方），戴手套才摸得到
+    const lockCls = st.lockOpen > 0.5 ? "lock-off" : "lock-on";
+    const act = mode === "remove" && st.manual > 0.05;
+    const CX = 470;
+    let block = null;   // 保險滑栓要擋住的位置
+    if (cfg.lock === "tongue" || cfg.lock === "dualTongue") {
+      tonguePos(cfg).forEach(p => o.push(r(p.x, p.y, p.w, p.h, lockCls, 'rx="2"')));
+    }
+    if (cfg.lock === "tongue") {
+      const p = tonguePos(cfg)[0], lx = p.x + p.w / 2, py = 46 + 4 * st.manual;
+      o.push(ln(lx, p.y, lx, py + 12, "linkage"));
+      o.push(r(lx - 10, py, 20, 12, "lock-on", 'rx="3"'));
+      o.push(tx(p.x + p.w + 5, p.y + p.h / 2 + 5, "舌片", "lbl sm acc"));
+      o.push(tx(CX, 57, act ? "壓片：拇指往下壓 ↓" : "壓片（解鎖用）", "lbl sm acc"));
+      block = { on: [lx - 5, 60], off: [lx - 27, 60], w: 10, h: 12 };
+    }
+    if (cfg.lock === "dualTongue") {
+      const bx = 420 - 6 * st.manual;
+      o.push(`<path d="M442 102 L446 102 L446 258 L442 258 M446 102 L446 52 L${bx + 20} 52" class="linkage"/>`);
+      o.push(r(bx, 46, 20, 12, "lock-on", 'rx="3"'));
+      o.push(tx(CX, 57, act ? "按鈕：往左按 ←" : "按鈕（連動上下鎖舌）", "lbl sm acc"));
+      block = { on: [404, 46], off: [404, 64], w: 10, h: 12 };
+    }
+    if (cfg.lock === "plunger") {
+      const rx = 440 + 16 * st.manual;
+      o.push(`<circle cx="330" cy="180" r="8" class="${lockCls}"/>`);
+      o.push(`<path d="M338 180 L420 180 L420 52 L${rx - 9} 52" class="linkage"/>`);
+      o.push(`<circle cx="${rx}" cy="52" r="9" class="ring"/>`);
+      o.push(tx(330, 206, "柱塞", "lbl sm acc", "middle"));
+      o.push(tx(CX + 16, 57, act ? "拉環：往右拉 →" : "拉環（解鎖用）", "lbl sm acc"));
+    }
+    if (cfg.lock === "cantilever") {
+      const d = 12 * st.lockOpen;
+      o.push(ln(440, 200 + d, 440, 292 + d, "linkage"));
+      o.push(r(430, 292 + d, 20, 12, "lock-on", 'rx="3"'));
+      o.push(tx(345, 232, "撓性懸臂＋扣爪", "lbl sm acc"));
+      if (cfg.spring) o.push(tx(345, 252, "＋金屬彈片", "lbl sm flt"));
+      o.push(tx(CX, 302, act ? "扳片：往下扳 ↓" : "扳片（解鎖用）", "lbl sm acc"));
+    }
+
+    // 保險滑栓：推到 ON 時擋住壓片或按鈕
+    if (cfg.safety && block) {
+      const sx = block.off[0] + (block.on[0] - block.off[0]) * st.safety;
+      const sy = block.off[1] + (block.on[1] - block.off[1]) * st.safety;
+      o.push(r(sx, sy, block.w, block.h, st.safety > 0.5 ? "safety-on" : "safety-off", 'rx="2"'));
+      o.push(tx(CX, 77, st.safety > 0.5 ? "保險滑栓 ON：解鎖件動不了" : "保險滑栓 OFF", "lbl sm flt"));
+    }
+    if (z > 0.03) o.push(tx(TAB.x + off + TAB.w / 2 + 40, 186 + ty, mode === "install" ? "↓ 壓入翻板" : "↑ 拉離翻板", "lbl", "middle"));
+
+    // 標註
+    o.push(`<line x1="${PLANE}" y1="44" x2="${PLANE}" y2="316" class="cut"/>`);
+    o.push(tx(PLANE + 4, 56, "A–A", "cutlbl"));
+    o.push(tx(206, (rails === "single" ? 160 : rails === "recess" ? 165 : 90) - 5, "擋塊", "lbl sm"));
+    if (mode === "install") o.push(hArrow(800, 640, 26, "滑入方向"));
+    else o.push(hArrow(640, 800, 26, "取出方向"));
+    return o.join("");
+  }
+
+  /* ---------- 剖面 ---------- */
+  const SEC = { a: 34, h: 26, c: 3, tb: 120, pt: 122, cx: { single: 210, top: 95, bot: 325 } };
+  function maleProfile(cx, sides, up) {
+    // up=false：從平板往下長（公軌在後蓋）；up=true：從翻板往上長
+    const { a, h } = SEC;
+    const base = up ? SEC.pt : SEC.tb, tip = up ? SEC.pt - h : SEC.tb + h;
+    const L = sides.includes("L") ? h : 0, R = sides.includes("R") ? h : 0;
+    return [[cx - a / 2, base], [cx + a / 2, base], [cx + a / 2 + R, tip], [cx - a / 2 - L, tip]];
+  }
+  function cavity(cx, sides, openL, openR) {
+    const { a, h, c, pt } = SEC;
+    const d = h + 3;
+    const xl0 = openL ? cx - a / 2 - openL : cx - a / 2 - c;
+    const xr0 = openR ? cx + a / 2 + openR : cx + a / 2 + c;
+    const xl1 = sides.includes("L") ? xl0 - d : xl0;
+    const xr1 = sides.includes("R") ? xr0 + d : xr0;
+    return [[xl0, pt], [xr0, pt], [xr1, pt + d], [xl1, pt + d]];
+  }
+  function drawSection(cfg, st) {
+    const o = [];
+    o.push(`<defs>
+      <pattern id="hT" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)" class="hatch-t"><line x1="0" y1="0" x2="0" y2="7"/></pattern>
+      <pattern id="hP" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)" class="hatch-p"><line x1="0" y1="0" x2="0" y2="7"/></pattern>
+    </defs>`);
+    const off = st.off, z = st.z;
+    const bodyHere = overlaps(TAB.x + off, TAB.x + TAB.w + off, PLANE - 1, PLANE + 1);
+    const railHere = cfg.rails === "recess" ? bodyHere :
+      maleRails(cfg).some(m => m.segs.some(s => overlaps(s[0] + off, s[1] + off, PLANE - 1, PLANE + 1)));
+    const ty = -30 * z;
+    const { cx } = SEC;
+
+    // 翻板（含母槽空腔）
+    o.push(r(20, SEC.pt, 380, 66, "s-plate"), r(20, SEC.pt, 380, 66, "", 'fill="url(#hP)"'));
+    o.push(tx(30, 180, "胸掛翻板", "lbl sm"));
+    let plateExtra = "";
+    if (cfg.rails === "single") o.push(pg(cavity(cx.single, "LR"), "s-void"));
+    else if (cfg.rails === "dualMS" || cfg.rails === "window") {
+      o.push(pg(cavity(cx.top, "LR"), "s-void"));
+      o.push(pg(cavity(cx.bot, "R", 12), "s-void"));
+      const gx = cx.bot - SEC.a / 2 - 12;
+      o.push(r(gx, SEC.pt, 9, SEC.h + 3, "s-gap"));
+      plateExtra += tx(gx - 4, SEC.pt + SEC.h + 22, "↔ 浮動間隙（放大）", "lbl sm flt");
+    } else if (cfg.rails === "splay") {
+      o.push(pg(cavity(cx.top, "L", 0, 12), "s-void"));
+      // 下爪活動空間
+      const present = bodyHere && railHere && z < 0.05;
+      const jx = present ? 3 : -5;
+      const bx0 = cx.bot + SEC.a / 2 + SEC.c;
+      o.push(pg([[cx.bot - SEC.a / 2 - 12, SEC.pt], [392, SEC.pt], [392, 172], [cx.bot - SEC.a / 2 - 12, 172]], "s-void"));
+      o.push(pg([[bx0 + jx, SEC.pt], [380 + jx, SEC.pt], [380 + jx, 166], [bx0 + SEC.h + 3 + jx, 166], [bx0 + SEC.h + 3 + jx, SEC.pt + SEC.h + 3]], "jaw"));
+      o.push(zig(380 + jx, 146, 394, 146, 4, 4));
+      plateExtra += tx(300, 184, "← 彈簧預壓下爪", "lbl sm flt");
+    } else if (cfg.rails === "recess") {
+      // 翻板凸軌往上長
+    }
+
+    // 柱塞
+    if (cfg.lock === "plunger") {
+      o.push(r(201, SEC.pt, 18, 40, "s-void"));
+    }
+
+    // 平板
+    if (bodyHere) {
+      o.push(`<g transform="translate(0 ${ty.toFixed(1)})">`);
+      o.push(r(20, 60, 380, 60, "s-tablet"), r(20, 60, 380, 60, "", 'fill="url(#hT)"'));
+      o.push(tx(30, 78, "平板後蓋", "lbl sm"));
+      if (cfg.rails === "recess") {
+        const { a, h, c } = SEC, d = h + 3, x = cx.single;
+        o.push(pg([[x - a / 2 - c, SEC.tb], [x + a / 2 + c, SEC.tb], [x + a / 2 + c + d, SEC.tb - d], [x - a / 2 - c - d, SEC.tb - d]], "s-tvoid"));
+      }
+      if (cfg.lock === "plunger" && off < 8) o.push(r(201, 106, 18, 14, "s-tvoid"));
+      if (railHere && cfg.rails !== "recess") {
+        const profs = cfg.rails === "single" ? [[cx.single, "LR"]] :
+          cfg.rails === "splay" ? [[cx.top, "L"], [cx.bot, "R"]] : [[cx.top, "LR"], [cx.bot, "R"]];
+        profs.forEach(([x, sd]) => {
+          o.push(pg(maleProfile(x, sd, false), "s-male"));
+          if (cfg.metal) o.push(r(x - SEC.a / 2 + 5, SEC.tb + 5, SEC.a - 10, SEC.h - 9, "s-metal"));
+        });
+      }
+      o.push(`</g>`);
+    } else {
+      o.push(tx(210, 66, "平板還沒到 A–A 剖面", "lbl mut", "middle"));
+    }
+
+    // 翻板凸軌（內凹方案）
+    if (cfg.rails === "recess") {
+      o.push(pg(maleProfile(cx.single, "LR", true), "s-prail"));
+      o.push(r(cx.single - 6, SEC.pt - SEC.h - (st.lockOpen > 0.5 ? 0 : 6), 12, 6, st.lockOpen > 0.5 ? "lock-off" : "lock-on"));
+    }
+
+    // 柱塞本體
+    if (cfg.lock === "plunger") {
+      const up = 1 - st.lockOpen;
+      o.push(r(203, SEC.pt - 12 * up, 14, 34, st.lockOpen > 0.5 ? "lock-off" : "lock-on", 'rx="3"'));
+      o.push(zig(210, SEC.pt + 22 - 12 * up, 210, 160, 5, 4));
+      o.push(tx(222, 158, "柱塞", "lbl sm acc"));
+    }
+    o.push(plateExtra);
+
+    // 標籤
+    o.push(tx(24, 20, "上緣", "lbl mut"));
+    o.push(tx(396, 20, "下緣", "lbl mut", "end"));
+    const note = {
+      single: "單軌：完整 45° 鳩尾，兩側斜面都咬合",
+      recess: "公母反過來：凹槽在後蓋、凸軌在翻板",
+      dualMS: "上軌完整鳩尾定位；下軌單斜面，留浮動",
+      window: "此剖面在唇緣位置；壓入時公軌段在窗口",
+      splay: "外八：上軌斜面朝上、下軌斜面朝下"
+    }[cfg.rails];
+    o.push(tx(210, 222, note, "lbl sm", "middle"));
+    if (cfg.metal) o.push(tx(210, 242, "灰色：公軌內的金屬嵌件", "lbl sm mut", "middle"));
+    if (cfg.rails === "window" && z > 0.03) o.push(tx(210, 262, st.z > 0 ? "平板正在壓入／拉離" : "", "lbl sm acc", "middle"));
+    o.push(tx(210, 282, "示意，非比例", "lbl sm mut", "middle"));
+    return o.join("");
+  }
+
+  /* ---------- 介面 ---------- */
+  const $ = id => document.getElementById(id);
+  const front = $("front"), section = $("section"), stepsEl = $("steps"), scrub = $("scrub"), infoEl = $("info");
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const state = { item: ITEMS[3], mode: "install", t: 1, playing: false, last: 0 };
+  const DUR = { install: 3400, remove: 3800 };
+
+  function buildPicker() {
+    const groups = [
+      ["A · 軌道結構", ITEMS.filter(i => i.group === "A")],
+      ["B · 鎖定／補強", ITEMS.filter(i => i.group === "B")],
+      ["建議組合", COMBOS]
+    ];
+    $("picker").innerHTML = groups.map(([label, list]) =>
+      `<div class="pgroup" role="group" aria-label="${label}"><span class="glabel">${label}</span>` +
+      list.map(it => {
+        const short = it.parts ? it.tag : it.name.replace(/（.*?）/g, "");
+        return `<button type="button" class="chip${it.star ? " star" : ""}" data-id="${it.id}" aria-pressed="false"><span class="n">${it.no}</span>${short}</button>`;
+      }).join("") + `</div>`).join("");
+    $("picker").addEventListener("click", e => {
+      const b = e.target.closest(".chip");
+      if (b) select(b.dataset.id, true);
+    });
+  }
+
+  function renderInfo(it) {
+    let html;
+    if (it.parts) {
+      html = `<h2><span class="tag">建議組合 · ${it.tag}</span>${it.name}</h2>
+        <div class="meta"><span>厚度估算 <b>${it.thick}</b></span></div>
+        <section class="wide"><h3>怎麼運作</h3><p>${it.text}</p></section>
+        <section><h3>組成</h3><div class="combo-parts">${it.parts.map(p => `<button type="button" class="chip" data-goto="${p}"><span class="n">${byId[p].no}</span>${byId[p].name}</button>`).join("")}</div></section>
+        <section><h3>適合</h3><p>${it.fit}</p></section>`;
+    } else {
+      html = `<h2><span class="tag">${it.tag} · 提案 ${it.no}</span>${it.name}${it.star ? ' <span class="tag" style="color:var(--accent)">★ 建議</span>' : ""}</h2>
+        <div class="meta"><span>厚度估算 <b>${it.thick}</b></span></div>
+        <section><h3>結構</h3><p>${it.struct}</p></section>
+        <section><h3>鎖定與操作</h3><p>${it.lockText}</p></section>
+        <section><h3>優點</h3><ul>${it.pros.map(x => `<li>${x}</li>`).join("")}</ul></section>
+        <section><h3>缺點</h3><ul>${it.cons.map(x => `<li>${x}</li>`).join("")}</ul></section>
+        <section class="wide"><h3>適用</h3><p>${it.fit}</p></section>`;
+    }
+    infoEl.innerHTML = html;
+  }
+  infoEl.addEventListener("click", e => {
+    const b = e.target.closest("[data-goto]");
+    if (b) select(b.dataset.goto, true);
+  });
+
+  function select(id, autoplay) {
+    const it = byId[id] || ITEMS[3];
+    state.item = it;
+    document.querySelectorAll(".chip[data-id]").forEach(c => c.setAttribute("aria-pressed", c.dataset.id === it.id ? "true" : "false"));
+    renderInfo(it);
+    try { history.replaceState(null, "", "#" + it.id); } catch (e) { /* 忽略 */ }
+    if (autoplay && !reduce) play("install");
+    else { state.mode = "install"; state.t = 1; state.playing = false; render(); }
+  }
+
+  function render() {
+    const cfg = state.item.cfg;
+    const st = state.mode === "install" ? installState(state.t, cfg) : removeState(state.t, cfg);
+    front.innerHTML = drawFront(cfg, st, state.mode);
+    section.innerHTML = drawSection(cfg, st);
+    const steps = stepList(cfg, state.mode);
+    let activeFound = false;
+    stepsEl.innerHTML = steps.map((s, i) => {
+      let cls = "";
+      if (state.t >= s[1] || state.t >= 0.999) cls = "done";
+      else if (!activeFound) { cls = "active"; activeFound = true; }
+      return `<li class="${cls}"><span class="k">${i + 1}</span>${s[0]}</li>`;
+    }).join("");
+    scrub.value = Math.round(state.t * 1000);
+    $("scrub-label").textContent = state.mode === "install" ? "裝上進度" : "取出進度";
+    $("btn-pause").textContent = state.playing ? "暫停" : (state.t < 1 ? "繼續" : "重播");
+  }
+
+  function play(mode) {
+    if (reduce) { state.mode = mode; state.t = 1; state.playing = false; render(); return; }
+    state.mode = mode; state.t = 0; state.playing = true; state.last = performance.now();
+    render();
+    requestAnimationFrame(tick);
+  }
+  function tick(now) {
+    if (!state.playing) return;
+    const dt = now - state.last; state.last = now;
+    state.t = Math.min(1, state.t + dt / DUR[state.mode]);
+    if (state.t >= 1) state.playing = false;
+    render();
+    if (state.playing) requestAnimationFrame(tick);
+  }
+
+  $("btn-install").addEventListener("click", () => play("install"));
+  $("btn-remove").addEventListener("click", () => play("remove"));
+  $("btn-pause").addEventListener("click", () => {
+    if (state.playing) { state.playing = false; render(); }
+    else if (state.t < 1) { state.playing = true; state.last = performance.now(); render(); requestAnimationFrame(tick); }
+    else play(state.mode);
+  });
+  scrub.addEventListener("input", () => {
+    state.playing = false;
+    state.t = scrub.value / 1000;
+    render();
+  });
+
+  buildPicker();
+  const startId = (location.hash || "").slice(1);
+  select(byId[startId] ? startId : "ca", false);
+})();
+</script>
+</body>
+</html>

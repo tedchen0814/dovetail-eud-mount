@@ -1,0 +1,6 @@
+# 原稿不進 repo（原稿保護）
+鳩尾槽設計.md
+dist/
+.vercel/
+# 參考圖（產品 CAD 截圖）不進 repo
+圖片*.png
