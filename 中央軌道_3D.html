@@ -149,13 +149,13 @@ footer { font-size: 12.5px; color: var(--muted); }
   <header>
     <div class="eyebrow">Direction 1 · Center rail · 3D</div>
     <h1>方向一　中央軌道：3D</h1>
-    <p class="lede">選一個提案看 3D。目前組合 RA（R4 雙軌主從軌＋L1 中央柱塞拉環）有模型，其他提案先預留版面。拖曳旋轉、滾輪縮放、右鍵平移。</p>
+    <p class="lede">選一個提案看 3D：平板<b>由右往左</b>滑進胸掛翻板，滑到底時鎖定件動作。L 模組以 2D 頁同樣的軌道為底示意。拖曳旋轉、滾輪縮放、右鍵平移。</p>
   </header>
 
   <nav class="picker" id="picker" aria-label="選擇提案"></nav>
 
   <section class="stage" aria-label="3D 模型">
-    <canvas id="view" aria-label="組合 A 3D 模型"></canvas>
+    <canvas id="view" aria-label="中央軌道 3D 模型"></canvas>
     <div class="labels" id="labels"></div>
     <div class="toolbar" role="toolbar" aria-label="視角與顯示">
       <button type="button" class="chip" data-view="iso" aria-pressed="true">斜視</button>
@@ -164,11 +164,12 @@ footer { font-size: 12.5px; color: var(--muted); }
       <button type="button" class="chip" data-view="sec" aria-pressed="false">剖面視角</button>
       <span class="sep" aria-hidden="true"></span>
       <button type="button" class="chip" id="t-xray" aria-pressed="true">平板半透明</button>
+      <button type="button" class="chip" id="t-plate" aria-pressed="false">翻板半透明</button>
       <button type="button" class="chip" id="t-sec" aria-pressed="false">剖面 A–A</button>
       <button type="button" class="chip" id="t-exp" aria-pressed="false">分解</button>
       <button type="button" class="chip" id="t-lbl" aria-pressed="true">標籤</button>
     </div>
-    <div class="hint">示意模型，尺寸為估算；浮動間隙放大顯示</div>
+    <div class="hint">示意模型，尺寸為估算；間隙放大顯示</div>
     <div class="placeholder" id="ph" hidden>
       <div class="ph-no" id="ph-no"></div>
       <div class="ph-name" id="ph-name"></div>
@@ -185,39 +186,9 @@ footer { font-size: 12.5px; color: var(--muted); }
   </div>
   <ol class="steps" id="steps"></ol>
 
-  <section class="info" id="info-ra">
-    <section>
-      <h2>組合 RA：結構重點 <a class="go2d" href="rail.html#ca">看 2D →</a></h2>
-      <ul>
-        <li><b>上軌（主）</b>：完整 45° 鳩尾，兩個斜面都咬合，負責上下、前後定位。</li>
-        <li><b>下軌（從）</b>：只有朝下的單斜面擋邊，往內留浮動間隙；只負責擋住平板往外翻，不參與定位，所以兩軌間距有公差也不會卡死。</li>
-        <li><b>左端擋塊</b>：平板推到底就停。</li>
-        <li><b>中央柱塞</b>：平板滑過時被後蓋壓下，對到定位孔時自動彈起止退。</li>
-        <li><b>拉環</b>：在翻板上緣、平板外框之外，戴手套摸得到；往右拉，柱塞縮回，平板順勢往右拉出。</li>
-        <li><b>鉸鏈＋扭簧</b>：翻板可往下翻開；滑動方向與鉸鏈軸平行，重力不會把平板沿滑動方向拉出。</li>
-      </ul>
-    </section>
-    <section>
-      <h2>模型尺寸（估算值）</h2>
-      <table>
-        <thead><tr><th>項目</th><th>數值</th></tr></thead>
-        <tbody>
-          <tr><td>平板外形（不含螢幕凸出）</td><td class="num">150 × 85 × 14 mm</td></tr>
-          <tr><td>胸掛翻板</td><td class="num">108 × 117 × 6 mm</td></tr>
-          <tr><td>鳩尾角</td><td class="num">45°</td></tr>
-          <tr><td>公軌：根部寬／頂部寬／高</td><td class="num">8 / 14 / 3 mm</td></tr>
-          <tr><td>公軌長度</td><td class="num">80 mm</td></tr>
-          <tr><td>上下兩軌中心距</td><td class="num">64 mm</td></tr>
-          <tr><td>下軌浮動間隙</td><td class="num">0.6 mm（放大顯示）</td></tr>
-          <tr><td>柱塞直徑／伸出量</td><td class="num">5.6 / 1.8 mm</td></tr>
-        </tbody>
-      </table>
-    </section>
-  </section>
+  <section class="info" id="info" aria-live="polite"></section>
 
-  <section class="info" id="info-ph" hidden></section>
-
-  <footer>Claude 2026-10-21 整理的設計概念，不是定案設計，也還沒驗證；尺寸為估算，不含製程、材料與強度評估。</footer>
+  <footer>Claude 2026-10-21～23 整理的設計概念，不是定案設計，也還沒驗證；尺寸為估算，不含製程、材料與強度評估。</footer>
 </div>
 
 <script>
@@ -234,15 +205,71 @@ footer { font-size: 12.5px; color: var(--muted); }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.localClippingEnabled = true;
 
-  /* ---------- 尺寸（mm） ---------- */
+  /* ---------- 尺寸（mm）：X 滑動（平板往 −X 滑入）、Y 上下緣（+Y 上緣）、Z 厚度（平板在 +Z） ---------- */
   const C = {
-    plateW: 108, plateH: 117, plateT: 6, f: 0.3,      // f：平板背面與翻板面的間隙
+    plateW: 108, plateH: 117, plateT: 6, f: 0.3,      // 翻板；f＝平板背面與翻板面的間隙
     tabW: 150, tabH: 85, tabT: 14,
-    yc: 32, railLen: 80, railX0: -50,                 // 軌道中心 y=±32，軌道 x 從 -50 到 +30
-    a: 8, h: 3, c: 0.25, d: 3.2, g: 0.6,              // 根部寬、高、側隙、槽深、浮動間隙
-    D: 160                                            // 取出時滑出距離
+    yc: 32, railX0: -50, railX1: 30,                  // 雙軌中心 y=±32；公軌 x 從 −50 到 +30
+    a: 8, h: 3, c: 0.25, d: 3.2, g: 0.6,              // 公軌根部寬、高、側隙、母槽深、浮動間隙
+    D: 160,                                           // 一般滑入距離
+    S: 13, LIFT: 20                                   // 開窗：短滑行程、放下高度
   };
+  const zf = -C.f, zb = -C.f - C.plateT, PH = C.plateH;
+  const WIN_MALE = [[-50, -38], [-24, -12], [2, 14]];                 // 開窗：公軌分段
+  const WIN_LIP = [[-50, -37], [-24, -11], [2, 15]];                  // 開窗：唇緣（其餘是窗口）
   const PERM = new THREE.Matrix4().set(0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1); // (u,v,w)→(x=w, y=u, z=v)
+
+  /* ---------- 提案資料（文字同 2D 頁） ---------- */
+  const ITEMS = [
+    ["R · 軌道結構", [
+      { id: "p1", no: "R1", name: "單軌長滑軌＋右端彈簧舌片", cfg: { rails: "single", lock: "tongue" },
+        struct: "後蓋中央一條水平 45° 公軌，翻板中央母槽，左端擋塊，右端一片彈簧舌片。",
+        lockText: "平板推到左端擋塊時，舌片自動彈起擋住公軌右端；壓下翻板上緣的壓片，舌片縮回，平板往右拉出。" },
+      { id: "p2", no: "R2", name: "單軌＋一體撓性懸臂自扣", cfg: { rails: "single", lock: "cantilever" },
+        struct: "翻板母槽的右段做成撓性懸臂，懸臂尾端有扣爪，和翻板一體成形。",
+        lockText: "公軌滑過時把懸臂往下壓開；滑到底後懸臂彈回，扣爪擋住公軌右端。往下扳翻板下緣的扳片解鎖。" },
+      { id: "p3", no: "R3", name: "後蓋內凹母槽＋翻板凸軌", cfg: { rails: "recess", lock: "tongue" },
+        struct: "公母反過來：後蓋中央做成內凹鳩尾槽（兩端開放），翻板做凸出的公軌。",
+        lockText: "凸軌上的舌片在平板到位時彈進後蓋凹槽頂面的缺口；壓下壓片解鎖。" },
+      { id: "p4", no: "R4", name: "雙軌主從軌", star: true, cfg: { rails: "dualMS", lock: "tongue" },
+        struct: "後蓋上緣、下緣各一條水平軌。上軌是完整 45° 鳩尾，負責定位；下軌只做朝下的單斜面擋邊，和翻板之間留浮動間隙。",
+        lockText: "這裡用上軌右端舌片示意；建議改搭 L1 的中央柱塞＋拉環（就是組合 RA）。" },
+      { id: "p5", no: "R5", name: "雙軌外八大鳩尾＋彈簧浮動下爪", cfg: { rails: "splay", lock: "tongue" },
+        struct: "上軌只有朝上的斜面、下軌只有朝下的斜面，合起來等於一個寬約 60 mm 的大鳩尾。翻板上爪固定，下爪可以上下移動。",
+        lockText: "金屬彈簧把下爪往上推，持續把平板壓向上爪；右端舌片止退。" },
+      { id: "p6", no: "R6", name: "雙軌開窗 Drop-in＋短行程", cfg: { rails: "window", lock: "tongue" },
+        struct: "翻板上下導軌的唇緣開出窗口，後蓋公軌對應分段。",
+        lockText: "平板直接貼上翻板、公軌段對準窗口壓入，再往左推約 13 mm，公軌段移到唇緣下方咬合；右端舌片止退。" }
+    ]],
+    ["L · 鎖定／補強", [
+      { id: "p7", no: "L1", name: "中央彈簧柱塞＋右端拉環", star: true, cfg: { rails: "dualMS", lock: "plunger" },
+        struct: "翻板中央（兩軌之間）裝一顆彈簧柱塞，後蓋對應位置有定位孔；柱塞由翻板內的拉桿連到上緣拉環。以 R4 的雙軌為底。",
+        lockText: "滑到底時柱塞自動彈進定位孔；往右拉拉環，柱塞縮回，平板順勢往右拉出。" },
+      { id: "p8", no: "L2", name: "上下雙鎖舌連動（單一按鈕）", cfg: { rails: "dualMS", lock: "dualTongue" },
+        struct: "上、下母槽右端各一片彈簧鎖舌，由翻板內的連桿接到上緣同一個按鈕。以 R4 的雙軌為底。",
+        lockText: "推到底時上下鎖舌各自彈起；按一個按鈕，兩片同時縮回。" },
+      { id: "p9", no: "L3", name: "自動鎖舌＋手動保險滑栓", cfg: { rails: "single", lock: "tongue", safety: true },
+        struct: "主鎖是自動舌片；副鎖是壓片旁的手動滑栓。以 R1 的單軌為底。",
+        lockText: "裝上時主鎖自動鎖上，再推滑栓蓋住壓片。取出時先推開滑栓，再壓壓片。" },
+      { id: "p10", no: "L4", name: "金屬補強軌條／嵌件", cfg: { rails: "dualMS", lock: "tongue", metal: true },
+        struct: "在後蓋公軌的磨耗面埋入不鏽鋼或鋁合金軌條（灰色）。以 R4 的雙軌為底。",
+        lockText: "不影響鎖定方式，任何鎖都可以搭配。" }
+    ]],
+    ["建議組合", [
+      { id: "ca", no: "RA", name: "雙軌主從軌＋中央柱塞拉環", cfg: { rails: "dualMS", lock: "plunger" }, parts: ["R4", "L1"],
+        struct: "上軌完整鳩尾定位、下軌單斜面浮動，兩軌中間放柱塞。",
+        lockText: "裝上時一路推到底就自動鎖；取出時右手拉拉環，柱塞縮回、平板同時往右出來。" },
+      { id: "cb", no: "RB", name: "單軌撓性懸臂＋金屬彈片", cfg: { rails: "single", lock: "cantilever", spring: true }, parts: ["R2"],
+        struct: "翻板一體成形的懸臂扣住公軌，懸臂下面加一片金屬彈片分擔預壓，減少塑膠潛變造成的鬆弛。",
+        lockText: "同 R2：滑到底扣爪彈回，往下扳扳片解鎖。" },
+      { id: "cc", no: "RC", name: "外八大鳩尾＋雙鎖舌＋保險滑栓", cfg: { rails: "splay", lock: "dualTongue", safety: true }, parts: ["R5", "L2", "L3"],
+        struct: "彈簧下爪讓平板零間隙；上下兩片鎖舌由同一個按鈕控制；按鈕旁再加保險滑栓。",
+        lockText: "推到底兩片鎖舌彈起，推上滑栓蓋住按鈕；取出時先推開滑栓、按按鈕，再往右拉出。" }
+    ]]
+  ];
+  const LIST = [].concat(...ITEMS.map(g => g[1]));
+  const byId = Object.fromEntries(LIST.map(x => [x.id, x]));
+  const HAS3D = Object.fromEntries(LIST.map(x => [x.id, true]));   // 之後新增提案還沒有模型時設 false
 
   /* ---------- 場景 ---------- */
   const scene = new THREE.Scene();
@@ -268,23 +295,17 @@ footer { font-size: 12.5px; color: var(--muted); }
     tablet: mat(0xE3B12A, { transparent: true }),
     rail: mat(0xC9971A, { transparent: true }),
     screen: mat(0x1A1F22, { roughness: 0.3, transparent: true }),
-    plate: mat(0x8E968B, {}),
-    stop: mat(0x3A403A, {}),
+    plate: mat(0x8E968B, { transparent: true }),
+    stop: mat(0x3A403A, { transparent: true }),
     base: mat(0x4E5847, { roughness: 0.85 }),
     strap: mat(0x3D4636, { roughness: 0.9 }),
     lock: mat(0xD2541F, { roughness: 0.45 }),
+    safety: mat(0x1C8781, { roughness: 0.45 }),
     metal: mat(0xA9B1B9, { roughness: 0.35, metalness: 0.6 }),
     hole: mat(0x2A2410, { transparent: true }),
     gap: mat(0x1C8781, { transparent: true, opacity: 0.55 })
   };
 
-  function extrudeYZ(shape, len, x0) {
-    const g = new THREE.ExtrudeGeometry(shape, { depth: len, bevelEnabled: false });
-    g.applyMatrix4(PERM);
-    g.translate(x0, 0, 0);
-    g.computeVertexNormals();
-    return g;
-  }
   function poly(pts) {
     const s = new THREE.Shape();
     s.moveTo(pts[0][0], pts[0][1]);
@@ -292,78 +313,153 @@ footer { font-size: 12.5px; color: var(--muted); }
     s.closePath();
     return s;
   }
-
-  // 翻板（含上下母槽），在 YZ 平面畫斷面再沿 X 拉伸
-  const plateGroup = new THREE.Group(); scene.add(plateGroup);
-  let PLATE_PTS;
-  (function buildPlate() {
-    const { plateH: H, plateT: T, f, a, c, d, g, yc } = C;
-    const zf = -f, zb = -f - T;
-    const y1 = yc + a / 2 + f + c, y0 = yc - a / 2 - f - c;        // 上軌（主）開口
-    const yi = -yc + a / 2 + g, yo = -yc - a / 2 - f - c;          // 下軌（從）內側浮動、外側斜面
-    const pts = PLATE_PTS = [
-      [-H / 2, zb], [H / 2, zb], [H / 2, zf],
-      [y1, zf], [y1 + d, zf - d], [y0 - d, zf - d], [y0, zf],
-      [yi, zf], [yi, zf - d], [yo - d, zf - d], [yo, zf],
-      [-H / 2, zf]
-    ];
-    const len = C.plateW - 4;
-    const body = new THREE.Mesh(extrudeYZ(poly(pts), len, -C.plateW / 2 + 4), M.plate);
-    plateGroup.add(body);
-    // 左端擋塊
-    const stop = new THREE.Mesh(new THREE.BoxGeometry(4, H, T), M.stop);
-    stop.position.set(-C.plateW / 2 + 2, 0, zf - T / 2);
-    plateGroup.add(stop);
-    // 浮動間隙標示（青色薄片）
-    const gapMesh = new THREE.Mesh(new THREE.BoxGeometry(len, g - 0.05, d * 0.9), M.gap);
-    gapMesh.position.set(-C.plateW / 2 + 4 + len / 2, -yc + a / 2 + g / 2, zf - d * 0.45);
-    plateGroup.add(gapMesh);
-    // 胸掛底座（MOLLE 面板）與織帶
-    const base = new THREE.Mesh(new THREE.BoxGeometry(150, 175, 4), M.base);
-    base.position.set(0, -10, zb - 9);
-    plateGroup.add(base);
-    for (let i = 0; i < 5; i++) {
-      const s = new THREE.Mesh(new THREE.BoxGeometry(150, 25.4 * 0.9, 1.6), M.strap);
-      s.position.set(0, -80 + i * 38, zb - 6.4);
-      plateGroup.add(s);
-    }
-    // 鉸鏈軸與扭簧
-    const hy = -H / 2 - 4, hz = zb - 2;
-    const rod = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 124, 24), M.metal);
-    rod.rotation.z = Math.PI / 2; rod.position.set(0, hy, hz);
-    plateGroup.add(rod);
-    class Helix extends THREE.Curve {
-      getPoint(t) { const ang = t * Math.PI * 2 * 9; return new THREE.Vector3(-34 + t * 26, hy + 4.2 * Math.cos(ang), hz + 4.2 * Math.sin(ang)); }
-    }
-    plateGroup.add(new THREE.Mesh(new THREE.TubeGeometry(new Helix(), 260, 0.7, 8, false), M.metal));
-    [-50, 0, 50].forEach(x => {
-      const k = new THREE.Mesh(new THREE.BoxGeometry(10, 8, 5), M.plate);
-      k.position.set(x, hy + 3, hz + 1.5);
-      plateGroup.add(k);
-    });
-  })();
-
-  // 柱塞、拉桿、拉環
-  const plunger = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 2.8, 6, 28), M.lock);
-  plunger.rotation.x = Math.PI / 2;
-  scene.add(plunger);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(4.2, 1, 14, 36), M.lock);
-  scene.add(ring);
-  const rods = [0, 1, 2].map(() => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 1, 12), M.lock); scene.add(m); return m; });
-  const UP = new THREE.Vector3(0, 1, 0);
-  function setRod(m, p1, p2) {
-    const v = new THREE.Vector3().subVectors(p2, p1), L = v.length();
-    m.position.copy(p1).addScaledVector(v, 0.5);
-    m.scale.set(1, Math.max(L, 0.01), 1);
-    m.quaternion.setFromUnitVectors(UP, v.normalize());
+  function extrudeYZ(pts, x0, x1, m) {           // YZ 斷面沿 X 拉伸
+    const g = new THREE.ExtrudeGeometry(poly(pts), { depth: x1 - x0, bevelEnabled: false });
+    g.applyMatrix4(PERM); g.translate(x0, 0, 0); g.computeVertexNormals();
+    return new THREE.Mesh(g, m);
+  }
+  function box(x0, x1, y0, y1, z0, z1, m) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), m);
+    mesh.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+    return mesh;
+  }
+  const UPV = new THREE.Vector3(0, 1, 0);
+  function rodMesh(p1, p2, r, m) {
+    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 12), m);
+    const v = new THREE.Vector3().subVectors(p2, p1);
+    mesh.position.copy(p1).addScaledVector(v, 0.5);
+    mesh.scale.set(1, v.length(), 1);
+    mesh.quaternion.setFromUnitVectors(UPV, v.normalize());
+    return mesh;
+  }
+  function capMesh(pts, color) {
+    const g = new THREE.ShapeGeometry(poly(pts));
+    g.applyMatrix4(PERM);
+    return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }));
   }
 
-  // 平板（後蓋＋螢幕＋公軌＋定位孔）；公軌斷面在 YZ 平面
-  const MASTER_PTS = [[C.yc - C.a / 2, 0.9], [C.yc + C.a / 2, 0.9], [C.yc + C.a / 2, 0], [C.yc + C.a / 2 + C.h, -C.h], [C.yc - C.a / 2 - C.h, -C.h], [C.yc - C.a / 2, 0]];
-  const SLAVE_PTS = [[-C.yc + C.a / 2, 0.9], [-C.yc + C.a / 2, -C.h], [-C.yc - C.a / 2 - C.h, -C.h], [-C.yc - C.a / 2, 0], [-C.yc - C.a / 2, 0.9]];
-  const tab = new THREE.Group(); scene.add(tab);
-  (function buildTablet() {
-    const { tabW: W, tabH: H, tabT: T } = C, r = 9;
+  /* ---------- 斷面形狀（YZ） ---------- */
+  const { a, h, c, d, g, f } = C;
+  const male = {   // 公軌：在平板背面（z=0）往 −Z 長，0.9 埋進後蓋
+    full: y => [[y - a / 2, 0.9], [y + a / 2, 0.9], [y + a / 2, 0], [y + a / 2 + h, -h], [y - a / 2 - h, -h], [y - a / 2, 0]],
+    down: y => [[y + a / 2, 0.9], [y + a / 2, -h], [y - a / 2 - h, -h], [y - a / 2, 0], [y - a / 2, 0.9]],   // 單斜面朝 −Y
+    up: y => [[y - a / 2, 0.9], [y + a / 2, 0.9], [y + a / 2, 0], [y + a / 2 + h, -h], [y - a / 2, -h]]      // 單斜面朝 +Y
+  };
+  // 母槽：矩形槽＋三角唇緣（唇緣可分段，開窗用）
+  function groove(type, y) {
+    const o = a / 2 + f + c;
+    if (type === "full") return { ch: [y - o - d, y + o + d], lips: [[[y - o - d, zf], [y - o, zf], [y - o - d, zf - d]], [[y + o, zf], [y + o + d, zf], [y + o + d, zf - d]]] };
+    if (type === "down") { const yi = y + a / 2 + g; return { ch: [y - o - d, yi], lips: [[[y - o - d, zf], [y - o, zf], [y - o - d, zf - d]]], gap: [y + a / 2, yi] }; }
+    if (type === "up") { const yi = y - a / 2 - g; return { ch: [yi, y + o + d], lips: [[[y + o, zf], [y + o + d, zf], [y + o + d, zf - d]]], gap: [yi, y - a / 2] }; }
+    if (type === "jaw") { const yi = y + a / 2 + g; return { ch: [y - o - d - 8, yi], lips: [] }; }
+  }
+  function plateProfile(channels) {
+    const pts = [[-PH / 2, zb], [PH / 2, zb], [PH / 2, zf]];
+    channels.slice().sort((p, q) => q[1] - p[1]).forEach(([lo, hi]) => pts.push([hi, zf], [hi, zf - d], [lo, zf - d], [lo, zf]));
+    pts.push([-PH / 2, zf]);
+    return pts;
+  }
+
+  /* ---------- 依提案建模型 ---------- */
+  let root = null, plateGroup, tab, caps, tabCaps;
+  const R = {};
+  function clearRoot() {
+    if (!root) return;
+    scene.remove(root);
+    root.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && !mats.includes(o.material)) o.material.dispose(); });
+  }
+  function railLayout(cfg) {
+    // 回傳：母槽、公軌、舌片位置（rail 右端外側）
+    const yc = C.yc;
+    switch (cfg.rails) {
+      case "single": return { grooves: [["full", 0]], males: [["full", 0]], tongueY: [0], end: C.railX1 };
+      case "dualMS": return { grooves: [["full", yc], ["down", -yc]], males: [["full", yc], ["down", -yc]], tongueY: [yc, -yc], end: C.railX1 };
+      case "window": return { grooves: [["full", yc], ["down", -yc]], males: [["full", yc], ["down", -yc]], tongueY: [yc, -yc], end: WIN_MALE[2][1], window: true };
+      case "splay": return { grooves: [["up", yc], ["jaw", -yc]], males: [["up", yc], ["down", -yc]], tongueY: [yc, -yc], end: C.railX1 };
+      case "recess": return { grooves: [], males: [], tongueY: [0], end: 30 };
+    }
+  }
+
+  function build(cfg) {
+    clearRoot();
+    for (const k in R) delete R[k];
+    root = new THREE.Group(); scene.add(root);
+    plateGroup = new THREE.Group(); root.add(plateGroup);
+    caps = new THREE.Group(); caps.position.x = -0.05; root.add(caps);
+    const L = railLayout(cfg);
+    const xs = -C.plateW / 2 + 4, xe = C.plateW / 2;
+    R.L = L;
+
+    // 翻板本體＋母槽
+    const gs = L.grooves.map(([t, y]) => groove(t, y));
+    const prof = plateProfile(gs.map(q => q.ch));
+    plateGroup.add(extrudeYZ(prof, xs, xe, M.plate));
+    caps.add(capMesh(prof, 0x5E665C));
+    const lipXs = L.window ? WIN_LIP : [[xs, xe]];
+    gs.forEach(q => q.lips.forEach(tri => {
+      lipXs.forEach(([x0, x1]) => plateGroup.add(extrudeYZ(tri, x0, x1, M.plate)));
+      if (lipXs.some(([x0, x1]) => x0 < 0 && x1 > 0)) caps.add(capMesh(tri, 0x5E665C));
+    }));
+    gs.forEach(q => {
+      if (!q.gap) return;   // 浮動間隙標示（青色薄片）
+      const gm = box(xs, xe, q.gap[0] + 0.02, q.gap[1] - 0.02, zf - d * 0.9, zf, M.gap);
+      plateGroup.add(gm);
+    });
+    plateGroup.add(box(-C.plateW / 2, xs, -PH / 2, PH / 2, zb, zf, M.stop));   // 左端擋塊
+    if (cfg.rails === "recess") {   // 翻板凸軌（往上長）
+      const o = a / 2;
+      const up = [[-o, zf - 0.5], [o, zf - 0.5], [o, zf], [o + h, zf + h], [-o - h, zf + h], [-o, zf]];
+      plateGroup.add(extrudeYZ(up, xs, 40, M.plate));
+      caps.add(capMesh(up, 0x5E665C));
+    }
+    if (cfg.rails === "splay") {    // 彈簧下爪（可上下浮動）
+      const y = -C.yc, o = a / 2 + f + c;
+      const jawPts = [[y - o - d - 3, zf], [y - o, zf], [y - o - d, zf - d], [y - o - d - 3, zf - d]];
+      R.jaw = new THREE.Group(); plateGroup.add(R.jaw);
+      R.jaw.add(extrudeYZ(jawPts, xs, xe, M.safety));
+      const jawCap = capMesh(jawPts, 0x15655F); R.jaw.add(jawCap); jawCap.position.x = -0.05;
+      R.jawSprings = [];
+      [-30, 0, 30].forEach(x => {
+        const sp = new THREE.Group(); plateGroup.add(sp);
+        class Coil extends THREE.Curve { getPoint(t) { const an = t * Math.PI * 2 * 5; return new THREE.Vector3(x + 1.1 * Math.cos(an), -t, zf - d / 2 + 1.1 * Math.sin(an)); } }
+        sp.add(new THREE.Mesh(new THREE.TubeGeometry(new Coil(), 80, 0.25, 6, false), M.metal));
+        R.jawSprings.push(sp);
+      });
+    }
+    buildEnvironment();
+
+    // 平板
+    tab = new THREE.Group(); root.add(tab);
+    tabCaps = new THREE.Group(); caps.add(tabCaps);
+    if (cfg.rails === "recess") {
+      const o = a / 2 + f + c, H = C.tabH / 2, T = C.tabT + 0.8;
+      const tp = [[-H, 0], [-o, 0], [-o - d, d], [o + d, d], [o, 0], [H, 0], [H, T], [-H, T]];
+      tab.add(extrudeYZ(tp, -C.tabW / 2, C.tabW / 2, M.tablet));
+      tabCaps.add(capMesh(tp, 0xC79A22));
+      tab.add(box(31, 35, -o - 0.3, o + 0.3, d, d + 2, M.hole));   // 凹槽頂面的舌片缺口
+    } else {
+      tab.add(roundedTablet());
+      tabCaps.add(capMesh([[-C.tabH / 2, 0.8], [C.tabH / 2, 0.8], [C.tabH / 2, C.tabT + 1.6], [-C.tabH / 2, C.tabT + 1.6]], 0xC79A22));
+    }
+    const scr = new THREE.Mesh(new THREE.PlaneGeometry(C.tabW - 22, C.tabH - 16), M.screen);
+    scr.position.z = C.tabT + 1.7; tab.add(scr);
+    const segs = L.window ? WIN_MALE : [[C.railX0, C.railX1]];
+    L.males.forEach(([t, y]) => {
+      const pts = male[t](y);
+      segs.forEach(([x0, x1]) => tab.add(extrudeYZ(pts, x0, x1, M.rail)));
+      if (segs.some(([x0, x1]) => x0 < 0 && x1 > 0)) tabCaps.add(capMesh(pts, 0x9C730C));
+      if (cfg.metal) segs.forEach(([x0, x1]) => {
+        const y0 = t === "up" ? y - a / 2 + 0.5 : y - a / 2 - h + 1, y1 = t === "down" ? y + a / 2 - 0.5 : y + a / 2 + h - 1;
+        tab.add(box(x0 + 1, x1 - 1, y0, y1, -h - 0.25, -h + 0.5, M.metal));
+      });
+    });
+
+    buildLock(cfg, L);
+    applyMaterials();
+  }
+
+  function roundedTablet() {
+    const W = C.tabW, H = C.tabH, T = C.tabT, r = 9;
     const s = new THREE.Shape();
     s.moveTo(-W / 2 + r, -H / 2); s.lineTo(W / 2 - r, -H / 2); s.quadraticCurveTo(W / 2, -H / 2, W / 2, -H / 2 + r);
     s.lineTo(W / 2, H / 2 - r); s.quadraticCurveTo(W / 2, H / 2, W / 2 - r, H / 2);
@@ -371,55 +467,126 @@ footer { font-size: 12.5px; color: var(--muted); }
     s.lineTo(-W / 2, -H / 2 + r); s.quadraticCurveTo(-W / 2, -H / 2, -W / 2 + r, -H / 2);
     const body = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: T, bevelEnabled: true, bevelThickness: 0.8, bevelSize: 0.8, bevelSegments: 2 }), M.tablet);
     body.position.z = 0.8;
-    tab.add(body);
-    const scr = new THREE.Mesh(new THREE.PlaneGeometry(W - 22, H - 16), M.screen);
-    scr.position.z = T + 1.7;
-    tab.add(scr);
-    const { a, h, yc, railLen: L, railX0: x0 } = C;
-    const master = poly(MASTER_PTS);
-    const slave = poly(SLAVE_PTS);
-    tab.add(new THREE.Mesh(extrudeYZ(master, L, x0), M.rail));
-    tab.add(new THREE.Mesh(extrudeYZ(slave, L, x0), M.rail));
-    const hole = new THREE.Mesh(new THREE.CircleGeometry(3.3, 32), M.hole);
-    hole.position.set(0, 0, -0.02); hole.rotation.y = Math.PI;
-    tab.add(hole);
-  })();
-
-  // 剖面 A–A 的切面（clipping 只會把模型切開變空心，這裡補上實心切面）
-  function capMesh(pts, color) {
-    const g = new THREE.ShapeGeometry(poly(pts));
-    g.applyMatrix4(PERM);
-    return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }));
+    return body;
   }
-  const caps = new THREE.Group(); caps.position.x = -0.05; caps.visible = false; scene.add(caps);
-  caps.add(capMesh(PLATE_PTS, 0x5E665C));
-  const tabCap = capMesh([[-C.tabH / 2, 0], [C.tabH / 2, 0], [C.tabH / 2, C.tabT + 1.6], [-C.tabH / 2, C.tabT + 1.6]], 0xC79A22);
-  const railCaps = new THREE.Group();
-  railCaps.add(capMesh(MASTER_PTS, 0x9C730C), capMesh(SLAVE_PTS, 0x9C730C));
-  const tabCaps = new THREE.Group(); tabCaps.add(tabCap, railCaps); caps.add(tabCaps);
-  const plungerCap = capMesh([[-2.8, 0], [2.8, 0], [2.8, 6], [-2.8, 6]], 0xB8461A);
-  caps.add(plungerCap);
+
+  function buildEnvironment() {
+    // 胸掛底座（MOLLE 面板）、織帶、鉸鏈軸與扭簧
+    const base = box(-75, 75, -97.5, 77.5, zb - 11, zb - 7, M.base); plateGroup.add(base);
+    for (let i = 0; i < 5; i++) plateGroup.add(box(-75, 75, -80 + i * 38 - 11.4, -80 + i * 38 + 11.4, zb - 7.2, zb - 5.6, M.strap));
+    const hy = -PH / 2 - 4, hz = zb - 2;
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 124, 24), M.metal);
+    rod.rotation.z = Math.PI / 2; rod.position.set(0, hy, hz); plateGroup.add(rod);
+    class Helix extends THREE.Curve { getPoint(t) { const an = t * Math.PI * 2 * 9; return new THREE.Vector3(-34 + t * 26, hy + 4.2 * Math.cos(an), hz + 4.2 * Math.sin(an)); } }
+    plateGroup.add(new THREE.Mesh(new THREE.TubeGeometry(new Helix(), 260, 0.7, 8, false), M.metal));
+    [-50, 0, 50].forEach(x => plateGroup.add(box(x - 5, x + 5, hy - 1, hy + 7, hz - 1, hz + 4, M.plate)));
+  }
+
+  /* ---------- 鎖定件 ---------- */
+  const PAD_Y = PH / 2 - 5.5;   // 上緣壓片／按鈕／拉環的位置（平板外框之外）
+  function buildLock(cfg, L) {
+    const tx = L.end + 0.5;      // 舌片在公軌右端外側
+    const padX = tx + 2;
+    if (cfg.lock === "tongue" || cfg.lock === "dualTongue") {
+      const ys = cfg.lock === "dualTongue" ? L.tongueY : [L.tongueY[0]];
+      R.tongues = ys.map(y => {
+        const t = new THREE.Group(); root.add(t);
+        const yy = cfg.rails === "recess" ? 0 : y;
+        const half = cfg.rails === "recess" ? 2.5 : a / 2 - 0.6;
+        t.add(box(tx, tx + 4, yy - half, yy + half, -4.5, 0, M.lock));   // 頂面在 z=0，位置由 applyState 調
+        t.userData.y = y;
+        return t;
+      });
+      R.pad = new THREE.Group(); root.add(R.pad);
+      R.pad.add(box(padX - 6, padX + 6, PAD_Y - 3.5, PAD_Y + 3.5, 0, 1.6, M.lock));
+      [-3, 0, 3].forEach(k => R.pad.add(box(padX + k - 0.4, padX + k + 0.4, PAD_Y - 3, PAD_Y + 3, 1.6, 2.1, M.lock)));
+      // 連桿（在翻板內，開「翻板半透明」才看得到）
+      const yLow = Math.min(...ys.map(y => cfg.rails === "recess" ? 0 : y));
+      R.pad.add(rodMesh(new THREE.Vector3(padX, yLow, -3.2), new THREE.Vector3(padX, PAD_Y, -3.2), 0.7, M.lock));
+      R.pad.add(rodMesh(new THREE.Vector3(padX, PAD_Y, -3.2), new THREE.Vector3(padX, PAD_Y, 0), 0.7, M.lock));
+      R.tx = [tx, tx + 4];
+    }
+    if (cfg.lock === "plunger") {
+      R.plunger = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 2.8, 6, 28), M.lock);
+      R.plunger.rotation.x = Math.PI / 2; root.add(R.plunger);
+      R.ring = new THREE.Mesh(new THREE.TorusGeometry(4.2, 1, 14, 36), M.lock); root.add(R.ring);
+      R.rods = [0, 1, 2].map(() => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 1, 12), M.lock); root.add(m); return m; });
+      const hole = new THREE.Mesh(new THREE.CircleGeometry(3.3, 32), M.hole);
+      hole.position.set(0, 0, -0.02); hole.rotation.y = Math.PI; tab.add(hole);
+    }
+    if (cfg.lock === "cantilever") {
+      // 懸臂根部在 x=52，自由端朝左，扣爪伸進母槽擋住公軌右端；扳片在翻板下緣
+      const rx = 52, rz = zf - d - 1.2;
+      R.arm = new THREE.Group(); R.arm.position.set(rx, 0, rz); root.add(R.arm);
+      R.arm.add(box(tx - rx, 0, -3.2, 3.2, -1.2, 0, M.lock));
+      R.arm.add(box(tx - rx, tx + 2.5 - rx, -3.2, 3.2, 0, -0.5 - rz, M.lock));   // 扣爪頂面在 z≈−0.5
+      R.arm.add(box(40 - rx, 43 - rx, -PH / 2 + 2, -3.2, -1.2, 0, M.lock));      // 往下緣的扳臂
+      R.arm.add(box(37 - rx, 46 - rx, -PH / 2 + 1, -PH / 2 + 8, -rz, -rz + 1.6, M.lock));   // 扳片
+      R.armLen = rx - tx;
+      if (cfg.spring) plateGroup.add(box(tx + 3, rx, -2.6, 2.6, rz - 2.2, rz - 1.6, M.metal));
+      R.tx = [tx, tx + 2.5];
+    }
+    if (cfg.safety) {
+      R.safety = new THREE.Group(); root.add(R.safety);
+      R.safety.add(box(-6.5, 6.5, PAD_Y - 4.5, PAD_Y + 4.5, 3, 4.2, M.safety));   // 蓋在壓片上方的橋
+      R.safety.add(box(6.5, 8.5, PAD_Y - 4.5, PAD_Y + 4.5, 0, 4.2, M.safety));
+      plateGroup.add(box(padX - 7, padX + 24, PAD_Y + 4.6, PAD_Y + 5.6, 0, 1, M.plate));   // 滑軌
+      R.safetyX = [padX, padX + 15];
+    }
+  }
 
   /* ---------- 標籤 ---------- */
   const labelsEl = document.getElementById("labels");
-  const TAGS = [
-    { t: "上軌（主）：完整鳩尾", p: () => sec ? new THREE.Vector3(0, C.yc - 8, -12) : new THREE.Vector3(-20 + st.dx, C.yc + 11, -1), cls: "" },
-    { t: "下軌（從）：單斜面＋浮動", p: () => sec ? new THREE.Vector3(0, -C.yc + 8, -12) : new THREE.Vector3(-20 + st.dx, -C.yc - 9, -1), cls: "flt" },
-    { t: "左端擋塊", p: () => new THREE.Vector3(-C.plateW / 2 + 2, C.plateH / 2, -0.3), cls: "", secHide: true },
-    { t: "柱塞", p: () => sec ? new THREE.Vector3(0, 0, -12) : new THREE.Vector3(0, -10, 1), cls: "acc" },
-    { t: "拉環：往右拉解鎖", p: () => ring.position.clone().add(new THREE.Vector3(30, -4, 0)), cls: "acc", secHide: true },
-    { t: "鉸鏈＋扭簧", p: () => new THREE.Vector3(-21, -C.plateH / 2 - 9, -C.f - C.plateT - 2), cls: "", secHide: true },
-    { t: "胸掛翻板", p: () => new THREE.Vector3(30, -C.plateH / 2 + 2, -0.3), cls: "", secHide: true }
-  ];
-  TAGS.forEach(tg => { const el = document.createElement("div"); el.className = "tag3d " + tg.cls; el.textContent = tg.t; labelsEl.appendChild(el); tg.el = el; });
-  let showLabels = true;
+  let tags = [], showLabels = true;
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  function buildLabels(cfg) {
+    const L = R.L, list = [];
+    const dxx = () => st.dx;
+    if (cfg.rails === "single") list.push(["公軌／母槽：完整鳩尾", () => V(-20 + dxx(), 6, -1), "", V(0, -7, -8)]);
+    if (cfg.rails === "dualMS" || cfg.rails === "window") {
+      list.push(["上軌（主）：完整鳩尾", () => V(-20 + dxx(), C.yc + 11, -1), "", V(0, C.yc - 8, -12)]);
+      list.push(["下軌（從）：單斜面＋浮動", () => V(-20 + dxx(), -C.yc - 9, -1), "flt", V(0, -C.yc + 8, -12)]);
+    }
+    if (cfg.rails === "window") list.push(["窗口（公軌段從這裡放下）", () => V(-30, C.yc + 4, 0), ""]);
+    if (cfg.rails === "splay") {
+      list.push(["上爪：斜面朝上", () => V(-20 + dxx(), C.yc + 11, -1), "", V(0, C.yc - 8, -12)]);
+      list.push(["彈簧下爪（往上推）", () => V(-20, -C.yc - 12, -1), "flt", V(0, -C.yc - 10, -12)]);
+    }
+    if (cfg.rails === "recess") {
+      list.push(["翻板凸軌", () => V(-30, 0, 4), "", V(0, 0, -8)]);
+      list.push(["後蓋內凹槽（兩端開放）", () => V(-40 + dxx(), 20, 2), ""]);
+    }
+    if (cfg.metal) list.push(["金屬嵌件", () => V(-35 + dxx(), C.yc, -3.5), "", V(0, C.yc, -9)]);
+    if (cfg.lock === "tongue" || cfg.lock === "dualTongue") {
+      list.push([cfg.lock === "dualTongue" ? "上下鎖舌" : "舌片", () => V(R.tx[0] + 2, R.tongues[0].userData.y, 2), "acc"]);
+      list.push([cfg.lock === "dualTongue" ? "按鈕：按下兩片一起縮回" : "壓片：往下壓解鎖", () => V(R.tx[0] + 2, PAD_Y + 2, 2.5), "acc"]);
+    }
+    if (cfg.lock === "plunger") {
+      list.push(["柱塞", () => V(0, -10, 1), "acc", V(0, 0, -12)]);
+      list.push(["拉環：往右拉解鎖", () => R.ring.position.clone().add(V(30, -4, 0)), "acc"]);
+    }
+    if (cfg.lock === "cantilever") {
+      list.push(["撓性懸臂＋扣爪", () => V(R.tx[0] + 4, 3, 0), "acc"]);
+      list.push(["扳片：往下扳解鎖", () => V(41, -PH / 2 + 4, 2), "acc"]);
+      if (cfg.spring) list.push(["金屬彈片", () => V(44, 0, -6), "flt"]);
+    }
+    if (cfg.safety) list.push(["保險滑栓", () => V(R.safety.position.x + 4, PAD_Y + 6, 4.5), "flt"]);
+    list.push(["左端擋塊", () => V(-C.plateW / 2 + 2, PH / 2, -0.3), ""]);
+    list.push(["胸掛翻板", () => V(30, -PH / 2 + 2, -0.3), ""]);
+    labelsEl.innerHTML = "";
+    tags = list.map(([t, p, cls, secP]) => {
+      const el = document.createElement("div"); el.className = "tag3d " + cls; el.textContent = t; labelsEl.appendChild(el);
+      return { el, p, secP };
+    });
+  }
   const tmpV = new THREE.Vector3();
   function placeLabels(w, h) {
-    labelsEl.hidden = !showLabels || !showLabelsFor3D;
-    if (labelsEl.hidden) return;
-    TAGS.forEach(tg => {
-      tmpV.copy(tg.p()).project(camera);
-      const vis = !(sec && tg.secHide) && tmpV.z < 1 && Math.abs(tmpV.x) < 1.05 && Math.abs(tmpV.y) < 1.05;
+    labelsEl.hidden = !showLabels;
+    if (!showLabels) return;
+    tags.forEach(tg => {
+      if (sec && !tg.secP) { tg.el.style.display = "none"; return; }
+      tmpV.copy(sec ? tg.secP : tg.p()).project(camera);
+      const vis = tmpV.z < 1 && Math.abs(tmpV.x) < 1.05 && Math.abs(tmpV.y) < 1.05;
       tg.el.style.display = vis ? "" : "none";
       if (vis) { tg.el.style.left = ((tmpV.x + 1) / 2 * w) + "px"; tg.el.style.top = ((1 - tmpV.y) / 2 * h) + "px"; }
     });
@@ -429,85 +596,155 @@ footer { font-size: 12.5px; color: var(--muted); }
   const clamp = v => v < 0 ? 0 : v > 1 ? 1 : v;
   const ease = t => { t = clamp(t); return t * t * (3 - 2 * t); };
   const seg = (t, a, b) => clamp((t - a) / (b - a));
-  const st = { mode: "install", t: 1, playing: false, last: 0, dx: 0, pull: 0, ext: 1 };
-  function compute() {
-    let dx, pull = 0;
-    if (st.mode === "install") dx = C.D * (1 - ease(seg(st.t, 0, 0.72)));
-    else {
-      pull = st.t < 0.86 ? ease(seg(st.t, 0.14, 0.26)) : 1 - ease(seg(st.t, 0.86, 0.96));
-      dx = C.D * ease(seg(st.t, 0.3, 0.84));
-    }
-    const covered = dx < C.tabW / 2 - 3;
-    let ext = 1;
-    if (pull > 0.02) ext = 1 - pull;
-    else if (covered) ext = dx < 0.8 ? 1 - dx / 0.8 : 0;
-    st.dx = dx; st.pull = pull; st.ext = ext;
-  }
-  const STEPS = {
-    install: [["對準翻板右端入口", 0.04], ["由右往左滑到左端擋塊", 0.72], ["柱塞彈進後蓋定位孔", 0.82]],
-    remove: [["往右拉翻板上緣的拉環，柱塞縮回", 0.28], ["往右拉出平板", 0.85], ["拉環與柱塞回到待命位置", 0.97]]
-  };
+  const overlaps = (a1, a2, b1, b2) => a1 < b2 && b1 < a2;
+  const st = { item: byId.ca, mode: "install", t: 1, playing: false, last: 0, dx: 0, lift: 0 };
 
-  let explode = false;
+  function compute() {
+    const cfg = st.item.cfg, t = st.t, win = cfg.rails === "window";
+    let dx, lift = 0, manual = 0, safety = 0;
+    if (st.mode === "install") {
+      if (win) { lift = C.LIFT * (1 - ease(seg(t, 0, 0.35))); dx = C.S * (1 - ease(seg(t, 0.38, 0.72))); }
+      else dx = C.D * (1 - ease(seg(t, 0, 0.72)));
+      if (cfg.safety) safety = ease(seg(t, 0.84, 0.96));
+    } else {
+      if (cfg.safety) safety = 1 - ease(seg(t, 0, 0.12));
+      manual = t < 0.86 ? ease(seg(t, 0.14, 0.26)) : 1 - ease(seg(t, 0.86, 0.96));
+      if (win) { dx = C.S * ease(seg(t, 0.3, 0.56)); lift = C.LIFT * ease(seg(t, 0.6, 0.84)); }
+      else dx = C.D * ease(seg(t, 0.3, 0.84));
+    }
+    return { dx, lift, manual, safety };
+  }
+  function railCovers(dx, lift, x0, x1, which) {
+    // 公軌（含分段）有沒有壓在 [x0,x1] 上；which：只看上軌(1)或下軌(-1)
+    const L = R.L;
+    if (lift > 3.5) return false;
+    if (st.item.cfg.rails === "recess") return overlaps(-C.tabW / 2 + dx, C.tabW / 2 + dx, x0, x1) && Math.abs(dx) > 0.8;
+    const segs = L.window ? WIN_MALE : [[C.railX0, C.railX1]];
+    return segs.some(([s0, s1]) => overlaps(s0 + dx, s1 + dx, x0, x1));
+  }
+
   function applyState() {
-    compute();
+    const cfg = st.item.cfg;
+    const s = compute();
+    st.dx = s.dx; st.lift = s.lift;
     const ez = explode ? 40 : 0;
-    tab.position.set(st.dx, 0, ez);
-    const top = -C.f + 1.8 * st.ext;
-    plunger.position.set(0, 0, top - 3);
+    tab.position.set(s.dx, 0, s.lift + ez);
+    tabCaps.position.set(0, 0, s.lift + ez);
+    tabCaps.visible = s.dx < C.tabW / 2 && overlaps(-C.tabW / 2 + s.dx, C.tabW / 2 + s.dx, -0.1, 0.1);
+    tabCaps.children.forEach((m, i) => { if (i > 0) m.visible = segCoversZero(s.dx); });
     caps.visible = sec;
-    tabCaps.position.z = ez;
-    tabCap.visible = st.dx < C.tabW / 2;
-    railCaps.visible = st.dx < -C.railX0;
-    plungerCap.position.z = top - 6;
-    const pr = 6 * st.pull;
-    ring.position.set(46 + pr, C.plateH / 2 - 6, -C.f + 1.2);
-    const zr = -C.f - 4.2;
-    setRod(rods[0], new THREE.Vector3(2.8, 0, zr), new THREE.Vector3(38 + pr, 0, zr));
-    setRod(rods[1], new THREE.Vector3(38 + pr, 0, zr), new THREE.Vector3(38 + pr, C.plateH / 2 - 6, zr));
-    setRod(rods[2], new THREE.Vector3(38 + pr, C.plateH / 2 - 6, zr), new THREE.Vector3(42 + pr, C.plateH / 2 - 6, -C.f + 1.2));
-    // UI
-    const list = STEPS[st.mode];
+
+    let open = 0;   // 1＝鎖定件縮回
+    if (R.tongues) {
+      const pressed = railCovers(s.dx, s.lift, R.tx[0], R.tx[1]) ? 1 : 0;
+      open = Math.max(pressed, s.manual);
+      // 舌片頂面：一般在母槽裡升到 z=−0.5（擋住公軌右端）；內凹案在凸軌上方升進後蓋凹槽的缺口
+      const top = cfg.rails === "recess" ? zf + h + 2 - 2.2 * open : -0.5 - 3.2 * open;
+      R.tongues.forEach(t => { t.position.z = top; });
+      R.pad.position.z = -1.2 * open;
+    }
+    if (R.plunger) {
+      const covered = s.dx < C.tabW / 2 - 3;
+      let ext = 1;
+      if (s.manual > 0.02) ext = 1 - s.manual;
+      else if (covered) ext = s.dx < 0.8 ? 1 - s.dx / 0.8 : 0;
+      const top = zf + 1.8 * ext;
+      R.plunger.position.set(0, 0, top - 3);
+      const pr = 6 * s.manual;
+      R.ring.position.set(46 + pr, PH / 2 - 6, zf + 1.2);
+      const zr = zf - 4.2;
+      setRod(R.rods[0], V(2.8, 0, zr), V(38 + pr, 0, zr));
+      setRod(R.rods[1], V(38 + pr, 0, zr), V(38 + pr, PH / 2 - 6, zr));
+      setRod(R.rods[2], V(38 + pr, PH / 2 - 6, zr), V(42 + pr, PH / 2 - 6, zf + 1.2));
+    }
+    if (R.arm) {
+      const pressed = railCovers(s.dx, s.lift, R.tx[0], R.tx[1]) ? 1 : 0;
+      open = Math.max(pressed, s.manual);
+      R.arm.rotation.y = -Math.asin(clamp(3.4 * open / R.armLen));
+    }
+    if (R.safety) R.safety.position.set(R.safetyX[0] + (R.safetyX[1] - R.safetyX[0]) * (1 - s.safety), 0, 0);
+    if (R.jaw) {
+      const over = s.lift < 1 && s.dx < C.railX1 - C.railX0;   // 下軌壓在下爪上：下爪被推開一點
+      const dy = over ? -0.8 : 0.4;
+      R.jaw.position.y = dy;
+      // 彈簧從下爪背面往外頂到槽壁（槽壁在下爪背面外 5 mm）
+      R.jawSprings.forEach(sp => { sp.position.y = -C.yc - a / 2 - f - c - d - 3 + dy; sp.scale.y = 5 + dy; });
+    }
+
+    // 步驟
+    const list = stepList(cfg, st.mode);
     let found = false;
-    document.getElementById("steps").innerHTML = list.map((s, i) => {
+    document.getElementById("steps").innerHTML = list.map((x, i) => {
       let cls = "";
-      if (st.t >= s[1] || st.t >= 0.999) cls = "done";
+      if (st.t >= x[1] || st.t >= 0.999) cls = "done";
       else if (!found) { cls = "active"; found = true; }
-      return `<li class="${cls}"><span class="k">${i + 1}</span>${s[0]}</li>`;
+      return `<li class="${cls}"><span class="k">${i + 1}</span>${x[0]}</li>`;
     }).join("");
     document.getElementById("scrub").value = Math.round(st.t * 1000);
     document.getElementById("scrub-label").textContent = st.mode === "install" ? "裝上進度" : "取出進度";
     document.getElementById("btn-pause").textContent = st.playing ? "暫停" : (st.t < 1 ? "繼續" : "重播");
   }
+  function segCoversZero(dx) {
+    const segs = R.L.window ? WIN_MALE : [[C.railX0, C.railX1]];
+    return segs.some(([s0, s1]) => s0 + dx < 0 && s1 + dx > 0);
+  }
+  function setRod(m, p1, p2) {
+    const v = new THREE.Vector3().subVectors(p2, p1);
+    m.position.copy(p1).addScaledVector(v, 0.5);
+    m.scale.set(1, Math.max(v.length(), 0.01), 1);
+    m.quaternion.setFromUnitVectors(UPV, v.normalize());
+  }
+  const LOCK_TXT = {
+    tongue: ["右端舌片自動彈起擋住", "壓下翻板上緣的壓片，舌片縮回"],
+    cantilever: ["懸臂扣爪彈回扣住", "往下扳翻板下緣的扳片"],
+    plunger: ["柱塞彈進後蓋定位孔", "往右拉翻板上緣的拉環，柱塞縮回"],
+    dualTongue: ["上下兩片鎖舌同時彈起", "按下翻板上緣的按鈕，上下鎖舌一起縮回"]
+  };
+  function stepList(cfg, mode) {
+    const Lt = LOCK_TXT[cfg.lock], win = cfg.rails === "window";
+    if (mode === "install") {
+      const s = win ? [["公軌段對準窗口放下", 0.36], ["往左推約 13 mm", 0.72]] : [["對準翻板右端入口", 0.04], ["由右往左滑到左端擋塊", 0.72]];
+      s.push([Lt[0], 0.82]);
+      if (cfg.safety) s.push(["推上保險滑栓", 0.96]);
+      return s;
+    }
+    const s = [];
+    if (cfg.safety) s.push(["推開保險滑栓", 0.13]);
+    s.push([Lt[1], 0.28]);
+    s.push([win ? "往右推，再把平板拿起" : "往右拉出平板", 0.85]);
+    s.push(["鎖定件回到待命位置", 0.97]);
+    return s;
+  }
 
   /* ---------- 視角與顯示 ---------- */
   const VIEWS = {
     iso: { pos: [225, 120, 215], tgt: [10, 0, -3] },
-    // 斷面類視角讓 Z（厚度方向）朝上、Y（平板上下緣）左右排開，寬畫面才放得下兩條軌
     end: { pos: [118, 0, 8], tgt: [0, 0, 1], up: [0, 0, 1] },
     front: { pos: [10, 6, 330], tgt: [5, 0, 0] },
     sec: { pos: [-78, 0, 6], tgt: [0, 0, 1], up: [0, 0, 1] }
   };
+  let curView = "iso";
   function setView(name) {
-    const v = VIEWS[name] || VIEWS.iso;
+    curView = VIEWS[name] ? name : "iso";
+    const v = VIEWS[curView];
     const up = v.up || [0, 1, 0];
     camera.up.set(up[0], up[1], up[2]);
-    controls.dispose();
-    controls = makeControls();
+    controls.dispose(); controls = makeControls();
     camera.position.set(v.pos[0], v.pos[1], v.pos[2]);
     controls.target.set(v.tgt[0], v.tgt[1], v.tgt[2]);
     controls.update();
-    document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === name ? "true" : "false"));
-    if (name === "front") setXray(true);
-    if (name === "sec" && !sec) setSec(true);
+    document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === curView ? "true" : "false"));
+    if (curView === "front") { xray = true; applyMaterials(); }
+    if (curView === "sec" && !sec) setSec(true);
   }
-  let xray = false, sec = false;
-  function setXray(on) {
-    xray = on;
-    [M.tablet, M.screen].forEach(m => { m.opacity = on ? 0.22 : 1; m.depthWrite = !on; });
-    M.rail.opacity = on ? 0.85 : 1;
-    M.hole.opacity = on ? 0.9 : 1;
-    document.getElementById("t-xray").setAttribute("aria-pressed", on ? "true" : "false");
+  let xray = true, plateXray = false, sec = false, explode = false;
+  function applyMaterials() {
+    [M.tablet, M.screen].forEach(m => { m.opacity = xray ? 0.22 : 1; m.depthWrite = !xray; });
+    M.rail.opacity = xray ? 0.85 : 1;
+    M.hole.opacity = xray ? 0.9 : 1;
+    [M.plate, M.stop].forEach(m => { m.opacity = plateXray ? 0.3 : 1; m.depthWrite = !plateXray; });
+    document.getElementById("t-xray").setAttribute("aria-pressed", xray ? "true" : "false");
+    document.getElementById("t-plate").setAttribute("aria-pressed", plateXray ? "true" : "false");
   }
   function setSec(on) {
     sec = on;
@@ -517,11 +754,55 @@ footer { font-size: 12.5px; color: var(--muted); }
   document.querySelector(".toolbar").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
     if (b.dataset.view) setView(b.dataset.view);
-    else if (b.id === "t-xray") setXray(!xray);
+    else if (b.id === "t-xray") { xray = !xray; applyMaterials(); }
+    else if (b.id === "t-plate") { plateXray = !plateXray; applyMaterials(); }
     else if (b.id === "t-sec") { setSec(!sec); if (sec) setView("sec"); applyState(); }
     else if (b.id === "t-exp") { explode = !explode; b.setAttribute("aria-pressed", explode ? "true" : "false"); applyState(); }
     else if (b.id === "t-lbl") { showLabels = !showLabels; b.setAttribute("aria-pressed", showLabels ? "true" : "false"); }
   });
+
+  /* ---------- 提案選單與說明 ---------- */
+  const pickerEl = document.getElementById("picker");
+  pickerEl.innerHTML = ITEMS.map(([label, list]) =>
+    `<div class="pgroup" role="group" aria-label="${label}"><span class="glabel">${label}</span>` +
+    list.map(it => `<button type="button" class="chip${it.star ? " star" : ""}${HAS3D[it.id] ? "" : " pending"}" data-id="${it.id}" aria-pressed="false"><span class="n">${it.no}</span>${it.name}</button>`).join("") +
+    "</div>").join("");
+  const DIMS = `<table><thead><tr><th>項目</th><th>數值</th></tr></thead><tbody>
+    <tr><td>平板外形（不含螢幕凸出）</td><td class="num">150 × 85 × 14 mm</td></tr>
+    <tr><td>胸掛翻板</td><td class="num">108 × 117 × 6 mm</td></tr>
+    <tr><td>鳩尾角</td><td class="num">45°</td></tr>
+    <tr><td>公軌：根部寬／頂部寬／高</td><td class="num">8 / 14 / 3 mm</td></tr>
+    <tr><td>公軌長度（開窗為 3 段 × 12 mm）</td><td class="num">80 mm</td></tr>
+    <tr><td>上下兩軌中心距</td><td class="num">64 mm</td></tr></tbody></table>`;
+  function renderInfo(it) {
+    const parts = it.parts ? `<p><b>組成：</b>${it.parts.join("＋")}</p>` : "";
+    document.getElementById("info").innerHTML = `<section>
+        <h2>${it.no}　${it.name} <a class="go2d" href="rail.html#${it.id}">看 2D →</a></h2>
+        ${parts}<p><b>結構：</b>${it.struct}</p><p><b>鎖定與操作：</b>${it.lockText}</p>
+      </section>
+      <section><h2>模型尺寸（估算值）</h2>${DIMS}</section>`;
+  }
+  function selectItem(id, autoplay) {
+    const it = byId[id] || byId.ca;
+    st.item = it;
+    pickerEl.querySelectorAll("[data-id]").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === it.id ? "true" : "false"));
+    const has = !!HAS3D[it.id];
+    document.getElementById("ph").hidden = has;
+    document.querySelector(".toolbar").hidden = !has;
+    ["btn-install", "btn-remove", "btn-pause", "scrub"].forEach(k => { document.getElementById(k).disabled = !has; });
+    if (!has) {
+      document.getElementById("ph-no").textContent = it.no;
+      document.getElementById("ph-name").textContent = it.name;
+      document.getElementById("ph-links").innerHTML = `<a href="rail.html#${it.id}">看 ${it.no} 的 2D 動畫 →</a>`;
+    }
+    build(it.cfg);
+    buildLabels(it.cfg);
+    renderInfo(it);
+    if (sec) setSec(true);
+    try { history.replaceState(null, "", "#" + it.id); } catch (e) { /* 忽略 */ }
+    if (autoplay && !reduce && has) play("install"); else { st.mode = "install"; st.t = 1; st.playing = false; applyState(); }
+  }
+  pickerEl.addEventListener("click", ev => { const b = ev.target.closest("[data-id]"); if (b) selectItem(b.dataset.id, true); });
 
   /* ---------- 播放 ---------- */
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -554,14 +835,13 @@ footer { font-size: 12.5px; color: var(--muted); }
   syncTheme();
 
   function resize() {
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    if (canvas.width !== Math.floor(w * renderer.getPixelRatio()) || canvas.height !== Math.floor(h * renderer.getPixelRatio())) {
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h; camera.updateProjectionMatrix();
+    const w = canvas.clientWidth, h2 = canvas.clientHeight;
+    if (canvas.width !== Math.floor(w * renderer.getPixelRatio()) || canvas.height !== Math.floor(h2 * renderer.getPixelRatio())) {
+      renderer.setSize(w, h2, false);
+      camera.aspect = w / h2; camera.updateProjectionMatrix();
     }
-    return [w, h];
+    return [w, h2];
   }
-
   function frame(now) {
     if (st.playing) {
       st.t = Math.min(1, st.t + (now - st.last) / DUR[st.mode]);
@@ -569,61 +849,21 @@ footer { font-size: 12.5px; color: var(--muted); }
       if (st.t >= 1) st.playing = false;
       applyState();
     }
-    const [w, h] = resize();
+    const [w, h2] = resize();
     controls.update();
     renderer.render(scene, camera);
-    placeLabels(w, h);
+    placeLabels(w, h2);
     requestAnimationFrame(frame);
   }
 
-  /* ---------- 提案選單（只有組合 RA 有 3D，其他預留版面） ---------- */
-  const RAIL_ITEMS = [
-    ["R · 軌道結構", [["p1", "R1", "單軌長滑軌＋右端彈簧舌片"], ["p2", "R2", "單軌＋一體撓性懸臂自扣"], ["p3", "R3", "後蓋內凹母槽＋翻板凸軌"],
-      ["p4", "R4", "雙軌主從軌", true], ["p5", "R5", "雙軌外八大鳩尾＋彈簧浮動下爪"], ["p6", "R6", "雙軌開窗 Drop-in＋短行程"]]],
-    ["L · 鎖定／補強", [["p7", "L1", "中央彈簧柱塞＋右端拉環", true], ["p8", "L2", "上下雙鎖舌連動"], ["p9", "L3", "自動鎖舌＋手動保險滑栓"], ["p10", "L4", "金屬補強軌條／嵌件"]]],
-    ["建議組合", [["ca", "RA", "雙軌主從軌＋中央柱塞拉環"], ["cb", "RB", "單軌撓性懸臂＋金屬彈片"], ["cc", "RC", "外八大鳩尾＋雙鎖舌＋保險滑栓"]]]
-  ];
-  const HAS3D = { ca: true };
-  const IN_RA = { p4: true, p7: true };   // 組合 RA 的組成，可以先看 RA
-  const railById = {};
-  RAIL_ITEMS.forEach(([, list]) => list.forEach(x => { railById[x[0]] = x; }));
-  const pickerEl = document.getElementById("picker");
-  pickerEl.innerHTML = RAIL_ITEMS.map(([label, list]) =>
-    `<div class="pgroup" role="group" aria-label="${label}"><span class="glabel">${label}</span>` +
-    list.map(([id, no, name, star]) => `<button type="button" class="chip${star ? " star" : ""}${HAS3D[id] ? "" : " pending"}" data-id="${id}" aria-pressed="false"><span class="n">${no}</span>${name}</button>`).join("") +
-    "</div>").join("");
-  function selectItem(id) {
-    if (!railById[id]) id = "ca";
-    const [, no, name] = railById[id];
-    const has = !!HAS3D[id];
-    pickerEl.querySelectorAll("[data-id]").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === id ? "true" : "false"));
-    document.getElementById("ph").hidden = has;
-    document.getElementById("info-ra").hidden = !has;
-    document.getElementById("info-ph").hidden = has;
-    document.querySelector(".toolbar").hidden = !has;
-    document.getElementById("steps").hidden = !has;
-    ["btn-install", "btn-remove", "btn-pause", "scrub"].forEach(k => { document.getElementById(k).disabled = !has; });
-    showLabelsFor3D = has;
-    if (!has) {
-      st.playing = false;
-      document.getElementById("ph-no").textContent = no;
-      document.getElementById("ph-name").textContent = name;
-      document.getElementById("ph-links").innerHTML = `<a href="rail.html#${id}">看 ${no} 的 2D 動畫 →</a>` + (IN_RA[id] ? `<a href="#ca" data-goto="ca">先看組合 RA 的 3D（含 ${no}）→</a>` : "");
-      document.getElementById("info-ph").innerHTML = `<section><h2>${no}　${name}</h2><p>3D 模型尚未製作。結構與動作請先看 <a class="go2d" href="rail.html#${id}">2D 動畫 →</a></p></section>`;
-    }
-    try { history.replaceState(null, "", "#" + id); } catch (e) { /* 忽略 */ }
-  }
-  let showLabelsFor3D = true;
-  pickerEl.addEventListener("click", ev => { const b = ev.target.closest("[data-id]"); if (b) selectItem(b.dataset.id); });
-  document.getElementById("ph-links").addEventListener("click", ev => { const a = ev.target.closest("[data-goto]"); if (a) { ev.preventDefault(); selectItem(a.dataset.goto); } });
-
-  // 測試用網址參數：?id=p2&mode=remove&t=0.5&view=end&xray=1&sec=1&exp=1
+  // 測試用網址參數：?id=p2&mode=remove&t=0.5&view=end&xray=0&plate=1&sec=1&exp=1
   const q = new URLSearchParams(location.search);
-  selectItem(q.get("id") || (location.hash || "").slice(1) || "ca");
-  setXray(q.get("xray") !== "0");
+  if (q.get("xray") === "0") xray = false;
+  if (q.get("plate") === "1") plateXray = true;
   setView(q.get("view") || "iso");
   if (q.get("sec") === "1") setSec(true);
   if (q.get("exp") === "1") { explode = true; document.getElementById("t-exp").setAttribute("aria-pressed", "true"); }
+  selectItem(q.get("id") || (location.hash || "").slice(1) || "ca", false);
   if (q.get("mode")) st.mode = q.get("mode") === "remove" ? "remove" : "install";
   if (q.get("t")) st.t = clamp(parseFloat(q.get("t")) || 0);
   applyState();
