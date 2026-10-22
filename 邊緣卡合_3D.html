@@ -103,13 +103,14 @@ h1 { margin: 0; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.25; text-wra
 footer { font-size: 12.5px; color: var(--muted); }
 
 .sitenav { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
-.sitenav a { color: var(--ink); text-decoration: none; padding: 3px 10px; border-radius: 6px; white-space: nowrap; }
+.sitenav a { color: var(--ink); text-decoration: none; padding: 3px 10px; border-radius: 6px; white-space: nowrap; font-size: 13.5px; }
 .sitenav a:hover { background: var(--panel); }
 .sitenav a[aria-current="page"] { background: var(--chip-on); color: var(--chip-on-fg); }
-.sitenav .brand { font-family: var(--font-display); font-weight: 600; padding-left: 0; margin-right: auto; }
-.sitenav .brand:hover { background: none; text-decoration: underline; }
+.sitenav .brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; padding: 2px 0; margin-right: auto; color: var(--ink); }
+.sitenav .brand:hover, .sitenav .brand[aria-current="page"] { background: none; color: var(--ink); }
+.sitenav .brand:hover { color: var(--accent); }
 .navgrp { display: flex; gap: 2px; align-items: center; }
-.navlbl { color: var(--muted); font-size: 12.5px; margin-right: 4px; }
+.navlbl { color: var(--ink); font-size: 15.5px; font-weight: 700; margin-right: 6px; }
 
 [hidden] { display: none !important; }
 .picker { display: grid; gap: 8px; }
@@ -236,12 +237,12 @@ footer { font-size: 12.5px; color: var(--muted); }
       lockOn: "上緣斜插、下緣壓下時，凸緣把扣塊壓下去；往左滑到底，凸緣離開扣塊，扣塊彈起擋住凸緣往右退。",
       lockOff: "手指從下緣伸進去，把按壓片往下壓，扣塊沉入背板；往右滑 18 mm，翹起下緣，從上緣抽出。",
       notes: ["卡扣在下緣中段，和上緣的連續卡緣分工：上緣承力、下緣止退", "橫臂走在平板的側邊溝槽裡，不會擋到平板", "按壓方向（往下）和取出方向不同，不容易誤觸"] },
-    { id: "e6", no: "E6", short: "雙段＋卡扣＋保險", name: "E6　雙段落下短滑：彈片卡扣＋保險滑鈕＋暫停位", star: true,
+    { id: "e6", no: "E6", short: "雙段＋卡扣＋保險", name: "E6　雙段落下短滑：彈片卡扣＋保險滑鈕＋暫停位",
       cfg: { motion: "drop2", top: SEG, bot: SEG, lock: "snap", safety: true, detent: true },
       parts: "E1 的彈片卡扣，加上一個蓋在彈片上方的保險滑鈕（沿 Y 方向滑），以及滑到一半的暫停位凸點。",
       lockOn: "放下、往左滑：滑到一半凸點卡住（半咬合，已經不會掉）；繼續滑到底，彈片卡扣彈起；最後把保險滑鈕推到彈片上方。",
       lockOff: "先把保險滑鈕推開，露出彈片；壓下彈片，往右滑（經過暫停位），再拿起。",
-      notes: ["保險滑鈕蓋住彈片時，手指根本按不到彈片，誤觸不會解鎖", "暫停位讓「沒滑到底」也不會掉", "建議方案：自動上鎖＋手動保險，日常好用又安全"] }
+      notes: ["保險滑鈕蓋住彈片時，手指根本按不到彈片，誤觸不會解鎖", "暫停位讓「沒滑到底」也不會掉", "自動上鎖負責日常使用，手動保險負責防誤觸"] }
   ];
   const byId = Object.fromEntries(ITEMS.map(x => [x.id, x]));
 
@@ -480,7 +481,7 @@ footer { font-size: 12.5px; color: var(--muted); }
     return m;
   }
 
-  const st = { item: ITEMS[5], mode: "install", t: 1, playing: false, last: 0 };
+  const st = { item: ITEMS[0], mode: "install", t: 1, playing: false, last: 0 };
   function stateNow() {
     const cfg = st.item.cfg, t = st.t;
     let u, manual = 0, engaged = 1, safety = 0;
@@ -643,7 +644,7 @@ footer { font-size: 12.5px; color: var(--muted); }
       <section class="wide"><h3>設計重點</h3><ul>${it.notes.map(x => `<li>${x}</li>`).join("")}</ul></section>`;
   }
   function select(id, autoplay) {
-    st.item = byId[id] || ITEMS[5];
+    st.item = byId[id] || ITEMS[0];
     document.querySelectorAll("[data-id]").forEach(c => c.setAttribute("aria-pressed", c.dataset.id === st.item.id ? "true" : "false"));
     plateXray = !!st.item.cfg.plateXray;
     build(st.item.cfg);
@@ -709,7 +710,7 @@ footer { font-size: 12.5px; color: var(--muted); }
   // 測試用網址參數：?id=e3&mode=remove&t=0.5&view=iso&tab=0&plate=1
   const q = new URLSearchParams(location.search);
   const startId = q.get("id") || (location.hash || "").slice(1);
-  select(byId[startId] ? startId : "e6", false);
+  select(byId[startId] ? startId : "e1", false);
   if (q.get("tab") === "0") { tabXray = false; applyMaterials(); }
   if (q.get("plate") === "1") { plateXray = true; applyMaterials(); }
   if (q.get("view")) setView(q.get("view"));

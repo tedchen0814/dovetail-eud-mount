@@ -49,13 +49,14 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 .sitenav { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
-.sitenav a { color: var(--ink); text-decoration: none; padding: 3px 10px; border-radius: 6px; white-space: nowrap; }
+.sitenav a { color: var(--ink); text-decoration: none; padding: 3px 10px; border-radius: 6px; white-space: nowrap; font-size: 13.5px; }
 .sitenav a:hover { background: var(--panel); }
 .sitenav a[aria-current="page"] { background: var(--chip-on); color: var(--chip-on-fg); }
-.sitenav .brand { font-family: var(--font-display); font-weight: 600; padding-left: 0; margin-right: auto; }
-.sitenav .brand:hover { background: none; text-decoration: underline; }
+.sitenav .brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; padding: 2px 0; margin-right: auto; color: var(--ink); }
+.sitenav .brand:hover, .sitenav .brand[aria-current="page"] { background: none; color: var(--ink); }
+.sitenav .brand:hover { color: var(--accent); }
 .navgrp { display: flex; gap: 2px; align-items: center; }
-.navlbl { color: var(--muted); font-size: 12.5px; margin-right: 4px; }
+.navlbl { color: var(--ink); font-size: 15.5px; font-weight: 700; margin-right: 6px; }
 
 header { display: grid; gap: 6px; }
 .eyebrow { font-family: var(--font-display); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }

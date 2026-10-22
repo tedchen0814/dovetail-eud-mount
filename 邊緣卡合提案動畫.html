@@ -173,13 +173,14 @@ footer { font-size: 12.5px; color: var(--muted); }
 
 
 .sitenav { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
-.sitenav a { color: var(--ink); text-decoration: none; padding: 3px 10px; border-radius: 6px; white-space: nowrap; }
+.sitenav a { color: var(--ink); text-decoration: none; padding: 3px 10px; border-radius: 6px; white-space: nowrap; font-size: 13.5px; }
 .sitenav a:hover { background: var(--panel); }
 .sitenav a[aria-current="page"] { background: var(--chip-on); color: var(--chip-on-fg); }
-.sitenav .brand { font-family: var(--font-display); font-weight: 600; padding-left: 0; margin-right: auto; }
-.sitenav .brand:hover { background: none; text-decoration: underline; }
+.sitenav .brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; padding: 2px 0; margin-right: auto; color: var(--ink); }
+.sitenav .brand:hover, .sitenav .brand[aria-current="page"] { background: none; color: var(--ink); }
+.sitenav .brand:hover { color: var(--accent); }
 .navgrp { display: flex; gap: 2px; align-items: center; }
-.navlbl { color: var(--muted); font-size: 12.5px; margin-right: 4px; }
+.navlbl { color: var(--ink); font-size: 15.5px; font-weight: 700; margin-right: 6px; }
 .go3d { color: var(--accent); font-size: 14px; font-weight: 500; }
 @media (max-width: 860px) {
   .views { grid-template-columns: minmax(0, 1fr); }
@@ -242,7 +243,7 @@ footer { font-size: 12.5px; color: var(--muted); }
           <tr><td class="num">E3</td><td>側壁 L 形槽＋側銷</td><td>放下＋滑</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●○○</td><td>旋轉擋片</td></tr>
           <tr><td class="num">E4</td><td>楔形卡緣＋落下短滑</td><td>放下＋滑（漸緊）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>楔形自鎖＋側推滑鈕</td></tr>
           <tr><td class="num">E5</td><td>上緣斜插＋下緣短滑</td><td>斜插＋壓下＋滑</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●○○</td><td class="dots">●○○</td><td>下緣按壓卡扣</td></tr>
-          <tr><td class="num">E6</td><td>雙段落下短滑 ★</td><td>放下＋滑（兩段）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>卡扣＋保險滑鈕</td></tr>
+          <tr><td class="num">E6</td><td>雙段落下短滑</td><td>放下＋滑（兩段）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>卡扣＋保險滑鈕</td></tr>
         </tbody>
       </table>
     </div>
@@ -298,7 +299,7 @@ footer { font-size: 12.5px; color: var(--muted); }
       lock: "下緣中段一個按壓式卡扣：滑到底後彈起，擋住下緣凸緣往右退。手指從下緣伸進去按下就放開。",
       pros: ["上緣全長承力、負責定位；下緣負責防脫和鎖定，分工清楚"],
       cons: ["裝上有斜插、壓下、滑動三個動作，比 E1 多一步", "上緣被連續卡緣包住，上緣不能放按鍵"] },
-    { id: "e6", no: "E6", name: "雙段落下短滑（兩階段鎖）", short: "雙段落下短滑", star: true,
+    { id: "e6", no: "E6", name: "雙段落下短滑（兩階段鎖）", short: "雙段落下短滑",
       cfg: { motion: "drop2", top: SEGS4, bot: SEGS4, lock: "snap", safety: true, plane: 255 },
       struct: "和 E1 相同的分段卡緣，但咬合分兩段：滑約 10 mm 先半咬合，滑到 20 mm 才全咬合。",
       install: "放下、往左滑。半咬合時有一個彈性凸點暫停位，這時平板已經不會掉；繼續滑到底，彈片卡扣自動彈起；最後推上保險滑鈕。",
@@ -587,7 +588,7 @@ footer { font-size: 12.5px; color: var(--muted); }
   const $ = id => document.getElementById(id);
   const front = $("front"), side = $("side"), section = $("section"), stepsEl = $("steps"), scrub = $("scrub"), infoEl = $("info");
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const state = { item: ITEMS[5], mode: "install", t: 1, playing: false, last: 0 };
+  const state = { item: ITEMS[0], mode: "install", t: 1, playing: false, last: 0 };
   const DUR = { install: 4200, remove: 4200 };
 
   $("picker").innerHTML = ITEMS.map(it =>
@@ -607,7 +608,7 @@ footer { font-size: 12.5px; color: var(--muted); }
   }
 
   function select(id, autoplay) {
-    const it = byId[id] || ITEMS[5];
+    const it = byId[id] || ITEMS[0];
     state.item = it;
     document.querySelectorAll(".chip[data-id]").forEach(c => c.setAttribute("aria-pressed", c.dataset.id === it.id ? "true" : "false"));
     renderInfo(it);
@@ -666,7 +667,7 @@ footer { font-size: 12.5px; color: var(--muted); }
   // 測試用：?id=e3&mode=remove&t=0.5 直接跳到某個狀態
   const q = new URLSearchParams(location.search);
   const startId = q.get("id") || (location.hash || "").slice(1);
-  select(byId[startId] ? startId : "e6", false);
+  select(byId[startId] ? startId : "e1", false);
   if (q.get("t")) { state.mode = q.get("mode") === "remove" ? "remove" : "install"; state.t = clamp(+q.get("t")); render(); }
 })();
 </script>
