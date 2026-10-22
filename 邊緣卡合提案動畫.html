@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>胸掛 EUD 邊緣卡合提案</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: 沿用鳩尾槽提案頁的工程圖紙感 — 頂部 6 個提案選單，中段正視圖（左）＋側視圖與 A–A 剖面（右，上下疊），下段說明卡與比較表 */
+:root {
+  --bg: #ECEEE9;
+  --panel: #F8F9F6;
+  --ink: #1E2523;
+  --muted: #5B6560;
+  --line: #C6CCC5;
+  --plate: #9AA197;
+  --plate-dark: #6C7469;
+  --channel: #555D55;
+  --tablet: #E3B12A;
+  --tablet-dark: #A87F0F;
+  --accent: #CF5320;
+  --float: #1C8781;
+  --chip-on: #1E2523;
+  --chip-on-fg: #F8F9F6;
+  --font-display: "Chakra Petch", "Noto Sans TC", system-ui, sans-serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141816; --panel: #1C211F; --ink: #E4E9E5; --muted: #9AA39E; --line: #343C38;
+    --plate: #737B71; --plate-dark: #565E55; --channel: #2F3530;
+    --tablet: #D6A622; --tablet-dark: #F0C24A; --accent: #F07A42; --float: #3FB8B0;
+    --chip-on: #E4E9E5; --chip-on-fg: #141816;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141816; --panel: #1C211F; --ink: #E4E9E5; --muted: #9AA39E; --line: #343C38;
+  --plate: #737B71; --plate-dark: #565E55; --channel: #2F3530;
+  --tablet: #D6A622; --tablet-dark: #F0C24A; --accent: #F07A42; --float: #3FB8B0;
+  --chip-on: #E4E9E5; --chip-on-fg: #141816;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 22px;
+}
+header { display: grid; gap: 6px; }
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+h1 { margin: 0; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.25; text-wrap: balance; font-weight: 700; }
+.lede { margin: 0; color: var(--muted); max-width: 72ch; }
+.lede b { color: var(--ink); font-weight: 500; }
+.lede a { color: var(--accent); }
+
+.picker { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip {
+  font: inherit; font-size: 14px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  display: inline-flex; gap: 6px; align-items: baseline;
+}
+.chip .n { font-family: var(--font-display); font-weight: 600; }
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-fg); border-color: var(--chip-on); }
+.chip.star .n::after { content: " ★"; color: var(--accent); }
+.chip:focus-visible, .btn:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.stage {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+.views { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 14px; }
+.side-col { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.view { min-width: 0; display: grid; gap: 4px; align-content: start; }
+.vtitle { font-family: var(--font-display); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+.view svg { width: 100%; height: auto; display: block; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn {
+  font: inherit; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--ink); background: var(--ink); color: var(--panel);
+  padding: 7px 16px; border-radius: 6px; cursor: pointer;
+}
+.btn.ghost { background: transparent; color: var(--ink); }
+.scrub { flex: 1 1 220px; display: flex; gap: 10px; align-items: center; min-width: 0; }
+.scrub input { flex: 1; min-width: 0; accent-color: var(--accent); }
+.scrub span { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.steps { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+.steps li { display: flex; gap: 6px; align-items: baseline; color: var(--muted); }
+.steps li .k {
+  font-family: var(--font-display); font-weight: 600; font-size: 12px;
+  border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-variant-numeric: tabular-nums;
+}
+.steps li.done { color: var(--ink); }
+.steps li.active { color: var(--accent); font-weight: 500; }
+.steps li.active .k { border-color: var(--accent); }
+.note { font-size: 12.5px; color: var(--muted); }
+
+.info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 28px; }
+.info h2 { margin: 0; font-size: 21px; line-height: 1.35; text-wrap: balance; grid-column: 1 / -1; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.info h2 .tag { font-family: var(--font-display); font-size: 12px; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+.info section { min-width: 0; }
+.info h3 { margin: 0 0 4px; font-size: 13px; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+.info p { margin: 0; max-width: 62ch; }
+.info ul { margin: 0; padding-left: 1.2em; }
+.info .wide { grid-column: 1 / -1; }
+
+.tables { display: grid; gap: 18px; }
+.tables h2 { margin: 0; font-size: 18px; }
+.tscroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 720px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 13px; }
+td.num { font-family: var(--font-display); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.dots { letter-spacing: 2px; color: var(--accent); white-space: nowrap; }
+footer { font-size: 12.5px; color: var(--muted); }
+
+/* SVG parts */
+.plate { fill: var(--plate); stroke: var(--plate-dark); stroke-width: 1.5; }
+.wallf { fill: var(--plate); fill-opacity: .28; stroke: var(--plate-dark); stroke-width: 1; stroke-dasharray: 4 3; }
+.lip { fill: var(--plate-dark); fill-opacity: .6; stroke: var(--ink); stroke-width: 1; }
+.slot { fill: var(--channel); fill-opacity: .55; }
+.stop { fill: var(--ink); }
+.tbody { fill: var(--tablet); fill-opacity: .2; stroke: var(--tablet-dark); stroke-width: 2; }
+.ledge { fill: var(--tablet); stroke: var(--tablet-dark); stroke-width: 1.4; }
+.hole { fill: var(--panel); stroke: var(--tablet-dark); stroke-width: 1.4; stroke-dasharray: 3 2; }
+.lock-on { fill: var(--accent); stroke: var(--ink); stroke-width: 1; }
+.lock-off { fill: var(--panel); stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 3 2; }
+.linkage { stroke: var(--accent); stroke-width: 2.4; fill: none; stroke-linecap: round; }
+.ring { fill: none; stroke: var(--accent); stroke-width: 3.5; }
+.safety-on { fill: var(--float); stroke: var(--ink); stroke-width: 1; }
+.safety-off { fill: var(--panel); stroke: var(--float); stroke-width: 1.4; }
+.detent { fill: var(--float); }
+.arrow { stroke: var(--ink); stroke-width: 2; fill: none; }
+.arrowhead { fill: var(--ink); }
+.cut { stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 8 4 2 4; }
+.lbl { font-family: var(--font-body); font-size: 13px; fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round; }
+.lbl.sm { font-size: 11.5px; }
+.lbl.acc { fill: var(--accent); }
+.lbl.flt { fill: var(--float); }
+.lbl.mut { fill: var(--muted); }
+#front .lbl { font-size: 16px; }
+#front .lbl.sm { font-size: 14px; }
+#side .lbl, #section .lbl { font-size: 14px; }
+#side .lbl.sm, #section .lbl.sm { font-size: 12.5px; }
+.cutlbl { font-family: var(--font-display); font-weight: 600; font-size: 15px; fill: var(--accent); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; }
+.s-tablet { fill: var(--tablet); fill-opacity: .4; stroke: var(--tablet-dark); stroke-width: 1.5; }
+.s-plate { fill: var(--plate); fill-opacity: .7; stroke: var(--plate-dark); stroke-width: 1.5; }
+
+@media (max-width: 860px) {
+  .views { grid-template-columns: minmax(0, 1fr); }
+  .info { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Chest Mount × 5" EUD · Edge interlock · Drop &amp; slide</div>
+    <h1>胸掛 EUD 邊緣卡合：落下短滑 6 個提案</h1>
+    <p class="lede">平板和背板大小差不多（背板稍大），卡合做在兩者的<b>邊緣</b>，參考 NP-F 電池：<b>先垂直放下、再往左滑一小段</b>就咬合，每個提案都有 lock。左邊是正視圖（面向背板，平板半透明）；右上是側視圖（從下緣看，看「放下」和「滑動」）；右下是 A–A 剖面（看邊緣怎麼勾住）。每個提案的 lock 另有 <a href="https://dovetail-eud-mount.vercel.app/edge-lock-3d.html">Lock 3D 說明 →</a>；前一輪中央軌道的提案在 <a href="https://dovetail-eud-mount.vercel.app/">鳩尾槽 10 提案 →</a></p>
+  </header>
+
+  <nav class="picker" aria-label="選擇提案" id="picker"></nav>
+
+  <section class="stage" aria-label="動畫">
+    <div class="views">
+      <div class="view">
+        <div class="vtitle">正視圖 · 面向背板（平板半透明）</div>
+        <svg id="front" viewBox="60 0 600 360" role="img" aria-label="正視圖動畫"></svg>
+      </div>
+      <div class="side-col">
+        <div class="view">
+          <div class="vtitle">側視圖 · 從下緣看（近側牆半透明）</div>
+          <svg id="side" viewBox="80 40 500 160" role="img" aria-label="側視圖動畫"></svg>
+        </div>
+        <div class="view">
+          <div class="vtitle">剖面 A–A · 上緣在左、下緣在右</div>
+          <svg id="section" viewBox="0 30 420 220" role="img" aria-label="剖面圖"></svg>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-install" type="button">▶ 裝上</button>
+      <button class="btn ghost" id="btn-remove" type="button">◀ 取出</button>
+      <button class="btn ghost" id="btn-pause" type="button">暫停</button>
+      <label class="scrub" for="scrub"><span id="scrub-label">裝上進度</span><input id="scrub" type="range" min="0" max="1000" value="1000"></label>
+    </div>
+    <ol class="steps" id="steps"></ol>
+    <div class="note">示意動畫，非實際比例。深灰是背板的卡緣（蓋在平板邊緣上方），實心黃色是平板的凸緣；兩者重疊就是咬合。橘色是鎖定件，青色是保險與暫停位。這一輪不考慮製程、材料與熱膨脹。</div>
+  </section>
+
+  <section class="stage info" id="info" aria-live="polite"></section>
+
+  <section class="tables">
+    <h2>比較表（概念評估，非實測）</h2>
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>#</th><th>方案</th><th>裝上動作</th><th>抗翻轉</th><th>裝卸速度</th><th>盲裝</th><th>側邊佔用少</th><th>Lock</th></tr></thead>
+        <tbody>
+          <tr><td class="num">1</td><td>分段卡緣＋落下短滑</td><td>放下＋滑</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td>彈片自動卡扣</td></tr>
+          <tr><td class="num">2</td><td>角落勾＋落下短滑</td><td>放下＋滑</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●●</td><td>中央柱塞＋拉環</td></tr>
+          <tr><td class="num">3</td><td>側壁 L 形槽＋側銷</td><td>放下＋滑</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●○○</td><td>旋轉擋片</td></tr>
+          <tr><td class="num">4</td><td>楔形卡緣＋落下短滑</td><td>放下＋滑（漸緊）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>楔形自鎖＋側推滑鈕</td></tr>
+          <tr><td class="num">5</td><td>上緣斜插＋下緣短滑</td><td>斜插＋壓下＋滑</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●○○</td><td class="dots">●○○</td><td>下緣按壓卡扣</td></tr>
+          <tr><td class="num">6</td><td>雙段落下短滑 ★</td><td>放下＋滑（兩段）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>卡扣＋保險滑鈕</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Claude 2026-10-22 整理的設計概念，不是定案設計，也還沒經過驗證。本頁只比較結構與操作，不含製程、材料、熱膨脹、衝擊強度。完整說明見 <code>胸掛EUD邊緣卡合_落下短滑提案.md</code>。</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- 幾何（正視圖 X 座標，三張圖共用） ---------- */
+  const S = 50;                                   // 落下短滑行程（約 18 mm）
+  const SEGS4 = [[140, 180], [235, 275], [330, 370], [425, 465]];
+  const CORNERS = [[114, 154], [470, 510]];
+  const PINS = [170, 320, 470];
+
+  /* ---------- 資料 ---------- */
+  const ITEMS = [
+    { id: "e1", no: "1", name: "分段卡緣＋落下短滑", short: "分段卡緣（NP-F 型）",
+      cfg: { motion: "drop", top: SEGS4, bot: SEGS4, lock: "snap", plane: 255 },
+      struct: "背板上下長邊各 4 段往內折的卡緣；平板側壁有對應的分段凸緣，和卡緣錯開半個間距。左端有擋牆。",
+      install: "平板垂直放下，凸緣落進卡緣之間的空檔；往左滑 15～20 mm，抵到擋牆，凸緣全部進到卡緣下方。",
+      lock: "背板右端一片彈片自動卡扣：平板經過時被壓下，滑到底後彈起擋住平板右緣（喀一聲）。按下卡扣才能往右退。",
+      pros: ["行程短、單手好裝", "上下兩條長邊都分擔負載，抗翻轉力臂約 85 mm"],
+      cons: ["只有一個卡扣，被誤觸就會解鎖（需要保險的話看提案 6）"] },
+    { id: "e2", no: "2", name: "角落勾＋落下短滑", short: "角落勾＋中央柱塞",
+      cfg: { motion: "drop", top: CORNERS, bot: CORNERS, lock: "plunger", plane: 134 },
+      struct: "卡緣只放在背板四個角落，各 15～20 mm 長；長邊中段完全不碰平板。",
+      install: "和提案 1 相同：放下後往左滑約 15 mm，四個角的凸緣鑽進角落勾下面。",
+      lock: "中央彈簧柱塞＋拉環（沿用前一輪組合 A）：滑到底時柱塞自動彈進平板中央的定位孔；往右拉背板右緣的拉環，柱塞縮回。",
+      pros: ["平板側邊被包住的部分最少，按鍵和 I/O 好安排", "柱塞藏在平板下方，不會被勾到"],
+      cons: ["四個角承受全部負載，角落勾要做厚", "長邊中段沒有拘束，平板中段可能微微翹"] },
+    { id: "e3", no: "3", name: "側壁 L 形槽＋側銷（J-slot）", short: "L 形槽＋側銷",
+      cfg: { motion: "drop", pins: PINS, lock: "flap", plane: 320 },
+      struct: "背板上下兩側立起側牆，牆上開 L 形槽（先垂直往下、再水平往左）；平板側邊各有 3 支短銷。",
+      install: "側銷對準槽口放下，滑到底後往左推，側銷進到水平段。",
+      lock: "槽口加一片旋轉擋片：平板到位後撥下擋片封住垂直段，側銷就退不回去。也可以在水平段末端加彈性凸點止退。",
+      pros: ["槽口本身會導正位置，盲裝最容易", "銷子是點接觸，滑動阻力小"],
+      cons: ["側牆要比卡緣高，背板變成淺盒狀", "擋片是手動上鎖，忘了撥就沒有鎖"] },
+    { id: "e4", no: "4", name: "楔形卡緣＋落下短滑", short: "楔形卡緣（自鎖預壓）",
+      cfg: { motion: "drop", top: SEGS4, bot: SEGS4, wedge: true, lock: "bolt", plane: 255 },
+      struct: "和提案 1 一樣是分段卡緣，但卡緣底面與平板凸緣頂面做成沿滑動方向的小斜坡（約 3°～5°）。",
+      install: "放下後往左滑，斜坡一路把平板往背板拉緊，滑到底時沒有間隙、不會晃。",
+      lock: "楔形本身提供摩擦自鎖，再加一個側推滑鈕：拇指把滑鈕推過去，擋塊插到平板右緣後方。",
+      pros: ["不靠凸點或彈片就能消除晃動", "咬合感最紮實"],
+      cons: ["取出時第一下要克服楔形摩擦", "斜坡角度太小會卡死，太大則自鎖力不足"] },
+    { id: "e5", no: "5", name: "上緣連續卡緣斜插＋下緣分段短滑", short: "上緣斜插＋下緣短滑",
+      cfg: { motion: "tiltTop", top: [[114, 520]], topLedge: [[120, 500]], bot: [[200, 250], [380, 430]], lock: "snapB", plane: 225 },
+      struct: "上緣一條全長連續卡緣，下緣 2 段短卡緣。",
+      install: "平板下緣翹起，上緣斜插進連續卡緣下面；壓下下緣貼平背板（下緣凸緣落在短卡緣之間），再往左滑約 15 mm。",
+      lock: "下緣中段一個按壓式卡扣：滑到底後彈起，擋住下緣凸緣往右退。手指從下緣伸進去按下就放開。",
+      pros: ["上緣全長承力、負責定位；下緣負責防脫和鎖定，分工清楚"],
+      cons: ["裝上有斜插、壓下、滑動三個動作，比提案 1 多一步", "上緣被連續卡緣包住，上緣不能放按鍵"] },
+    { id: "e6", no: "6", name: "雙段落下短滑（兩階段鎖）", short: "雙段落下短滑", star: true,
+      cfg: { motion: "drop2", top: SEGS4, bot: SEGS4, lock: "snap", safety: true, plane: 255 },
+      struct: "和提案 1 相同的分段卡緣，但咬合分兩段：滑約 10 mm 先半咬合，滑到 20 mm 才全咬合。",
+      install: "放下、往左滑。半咬合時有一個彈性凸點暫停位，這時平板已經不會掉；繼續滑到底，彈片卡扣自動彈起；最後推上保險滑鈕。",
+      lock: "主鎖是右端彈片自動卡扣，副鎖是保險滑鈕：推上後卡扣按不下去。取出時先撥下保險滑鈕、再按卡扣。",
+      pros: ["沒有完全鎖好也不會直接掉", "保險滑鈕防止在胸前被裝備誤壓解鎖", "手感最接近 NP-F"],
+      cons: ["取出多一個步驟", "保險滑鈕要夠大，戴手套才撥得動"] }
+  ];
+  const byId = Object.fromEntries(ITEMS.map(x => [x.id, x]));
+
+  /* ---------- 時間軸 ---------- */
+  const clamp = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const ease = t => { t = clamp(t); return t * t * (3 - 2 * t); };
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  const overlaps = (a1, a2, b1, b2) => a1 < b2 && b1 < a2;
+
+  // u：移動進度（0＝還沒裝、1＝到位）；取出時倒著走同一條路徑
+  function motion(cfg, u) {
+    const m = { off: 0, z: 0, angX: 0, detent: false };
+    if (cfg.motion === "drop") {
+      m.z = 1 - ease(seg(u, 0, 0.42));
+      m.off = S * (1 - ease(seg(u, 0.5, 1)));
+    } else if (cfg.motion === "drop2") {
+      m.z = 1 - ease(seg(u, 0, 0.38));
+      m.off = S - S / 2 * ease(seg(u, 0.44, 0.65)) - S / 2 * ease(seg(u, 0.78, 1));
+      m.detent = m.z < 0.02 && Math.abs(m.off - S / 2) < 3;
+    } else if (cfg.motion === "tiltTop") {
+      m.angX = 10 * (1 - ease(seg(u, 0, 0.5)));
+      m.off = S * (1 - ease(seg(u, 0.6, 1)));
+      m.z = m.angX / 10 * 0.6;
+    }
+    return m;
+  }
+
+  // 被動鎖：平板經過時被壓開，到位後自己彈回
+  function passiveOpen(cfg, m) {
+    switch (cfg.lock) {
+      case "snap": return m.z < 0.05 && 530 + m.off > 537 ? 1 : 0;
+      case "plunger": return m.z < 0.5 && Math.abs(m.off) > 6 ? 1 : 0;
+      case "snapB": return m.angX < 1 && overlaps(200 + m.off, 250 + m.off, 252, 260) ? 1 : 0;
+      default: return 0;
+    }
+  }
+  const MANUAL_LOCK = { flap: true, bolt: true };
+
+  function stateAt(cfg, mode, t) {
+    let u, manual = 0, engaged = 1, safety = 0;
+    if (mode === "install") {
+      u = seg(t, 0, 0.74);
+      if (MANUAL_LOCK[cfg.lock]) engaged = ease(seg(t, 0.8, 0.92));
+      if (cfg.safety) safety = ease(seg(t, 0.84, 0.95));
+    } else {
+      u = 1 - seg(t, 0.28, 0.86);
+      if (cfg.safety) safety = 1 - ease(seg(t, 0, 0.1));
+      if (MANUAL_LOCK[cfg.lock]) engaged = 1 - ease(seg(t, 0.06, 0.2));
+      else manual = t < 0.88 ? ease(seg(t, 0.12, 0.24)) : 1 - ease(seg(t, 0.88, 0.97));
+    }
+    const m = motion(cfg, u);
+    const lockOpen = MANUAL_LOCK[cfg.lock] ? 1 - engaged : Math.max(manual, passiveOpen(cfg, m));
+    return Object.assign(m, { lockOpen, manual, engaged, safety });
+  }
+
+  const STEPS = {
+    e1: { install: [["平板垂直放下，凸緣落進卡緣空檔", 0.31], ["往左滑 15～20 mm 抵到擋牆", 0.74], ["右端卡扣自動彈起（喀）", 0.8]],
+          remove: [["按下右端卡扣", 0.26], ["往右退 15～20 mm", 0.57], ["垂直拿起平板", 0.86], ["卡扣回到待命位置", 0.97]] },
+    e2: { install: [["平板垂直放下", 0.31], ["往左滑約 15 mm", 0.74], ["柱塞自動彈進中央定位孔", 0.8]],
+          remove: [["往右拉背板右緣的拉環，柱塞縮回", 0.26], ["往右退約 15 mm", 0.57], ["垂直拿起平板", 0.86], ["柱塞回到待命位置", 0.97]] },
+    e3: { install: [["側銷對準 L 形槽口放下", 0.31], ["往左推，側銷進到水平段", 0.74], ["撥下槽口的旋轉擋片", 0.92]],
+          remove: [["撥開旋轉擋片", 0.2], ["往右推回垂直段", 0.57], ["垂直拿起平板", 0.86]] },
+    e4: { install: [["平板垂直放下", 0.31], ["往左滑，楔形斜面把平板拉緊", 0.74], ["推入側推滑鈕", 0.92]],
+          remove: [["推回側推滑鈕", 0.2], ["往右推開楔形（第一下較緊）", 0.57], ["垂直拿起平板", 0.86]] },
+    e5: { install: [["上緣斜插進連續卡緣（下緣翹起）", 0.05], ["壓下下緣，貼平背板", 0.37], ["往左滑約 15 mm", 0.74], ["下緣卡扣自動彈起", 0.8]],
+          remove: [["按下緣卡扣", 0.26], ["往右滑約 15 mm", 0.51], ["翹起下緣，從上緣抽出", 0.86], ["卡扣回到待命位置", 0.97]] },
+    e6: { install: [["平板垂直放下", 0.28], ["往左滑到暫停位（半咬合）", 0.48], ["繼續滑到底", 0.74], ["卡扣自動彈起", 0.8], ["推上保險滑鈕", 0.95]],
+          remove: [["撥下保險滑鈕", 0.1], ["按下卡扣", 0.26], ["往右滑，經過暫停位", 0.62], ["垂直拿起平板", 0.86]] }
+  };
+
+  /* ---------- SVG 小工具 ---------- */
+  const r = (x, y, w, h, c, ex = "") => `<rect x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" width="${(+w).toFixed(1)}" height="${(+h).toFixed(1)}" class="${c}" ${ex}/>`;
+  const ln = (x1, y1, x2, y2, c) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${c}"/>`;
+  const pg = (pts, c) => `<polygon points="${pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")}" class="${c}"/>`;
+  const tx = (x, y, s, c = "lbl", a = "start") => `<text x="${x}" y="${y}" class="${c}" text-anchor="${a}">${s}</text>`;
+  function hArrow(x1, x2, y, label) {
+    const dir = x2 < x1 ? 1 : -1;
+    return ln(x1, y, x2, y, "arrow") + pg([[x2, y], [x2 + 9 * dir, y - 5], [x2 + 9 * dir, y + 5]], "arrowhead") +
+      tx((x1 + x2) / 2, y - 7, label, "lbl", "middle");
+  }
+  const ledgeOf = cfg => ({ top: cfg.topLedge || cfg.top || [], bot: cfg.bot || [] });
+
+  /* ---------- 正視圖（X 往右、Y 往下；上緣在上） ---------- */
+  function drawFront(cfg, st, mode) {
+    const o = [];
+    o.push(r(100, 40, 460, 280, "plate", 'rx="14"'));
+    o.push(tx(100, 30, "背板（胸掛翻板）", "lbl mut"));
+    o.push(r(100, 40, 12, 280, "stop"));
+    o.push(tx(100, 340, "左端擋牆", "lbl sm"));
+
+    // 平板
+    const dx = st.off, ty = -16 * st.z;
+    o.push(`<g transform="translate(${dx.toFixed(1)} ${ty.toFixed(1)})" opacity="${(1 - 0.3 * st.z).toFixed(2)}">`);
+    o.push(r(112, 56, 418, 248, "tbody", 'rx="16"'));
+    const L = ledgeOf(cfg);
+    L.top.forEach(s => o.push(r(s[0], 56, s[1] - s[0], 10, "ledge")));
+    L.bot.forEach(s => o.push(r(s[0], 294, s[1] - s[0], 10, "ledge")));
+    if (cfg.pins) cfg.pins.forEach(x => { o.push(`<circle cx="${x}" cy="58" r="6" class="ledge"/>`, `<circle cx="${x}" cy="302" r="6" class="ledge"/>`); });
+    if (cfg.lock === "plunger") o.push(`<circle cx="321" cy="180" r="9" class="hole"/>`);
+    o.push(tx(150, 140, "平板（半透明）", "lbl sm mut"));
+    o.push(`</g>`);
+
+    // 背板的卡緣（蓋在平板邊緣上方）
+    (cfg.top || []).forEach(s => o.push(r(s[0], 40, s[1] - s[0], 26, "lip")));
+    (cfg.bot || []).forEach(s => o.push(r(s[0], 294, s[1] - s[0], 26, "lip")));
+    if (cfg.top) o.push(tx(cfg.top[0][0], 84, cfg.top.length === 1 ? "上緣連續卡緣" : "卡緣", "lbl sm"));
+    if (cfg.pins) {
+      o.push(r(112, 40, 418, 14, "wallf"), r(112, 306, 418, 14, "wallf"));
+      o.push(tx(130, 84, "側牆（L 形槽在牆上，看側視圖）", "lbl sm"));
+    }
+    if (cfg.wedge) o.push(tx(cfg.top[1][0], 84, "楔形卡緣（斜坡看側視圖）", "lbl sm"));
+
+    // 鎖定件
+    const lc = st.lockOpen > 0.5 ? "lock-off" : "lock-on";
+    const act = mode === "remove" && st.manual > 0.05;
+    if (cfg.lock === "snap") {
+      o.push(r(536, 150, 12, 60, lc, 'rx="2"'));
+      o.push(tx(552, 140, act ? "卡扣：往下按 ↓" : "彈片卡扣", "lbl sm acc"));
+      if (cfg.safety) {
+        const sy = 230 - 18 * st.safety;
+        o.push(r(536, sy, 12, 14, st.safety > 0.5 ? "safety-on" : "safety-off", 'rx="2"'));
+        o.push(tx(552, 250, st.safety > 0.5 ? "保險 ON：卡扣按不下" : "保險滑鈕 OFF", "lbl sm flt"));
+      }
+    }
+    if (cfg.lock === "plunger") {
+      const rx = 546 + 12 * st.manual;
+      o.push(`<circle cx="321" cy="180" r="8" class="${lc}"/>`);
+      o.push(`<path d="M329 180 L${rx - 9} 180" class="linkage"/>`);
+      o.push(`<circle cx="${rx}" cy="180" r="9" class="ring"/>`);
+      o.push(tx(321, 206, "柱塞", "lbl sm acc", "middle"));
+      o.push(tx(546, 160, act ? "拉環 →" : "拉環", "lbl sm acc"));
+    }
+    if (cfg.lock === "flap") {
+      o.push(r(513, 40, 14, 14, lc), r(513, 306, 14, 14, lc));
+      o.push(tx(560, 342, st.engaged > 0.5 ? "旋轉擋片：封住槽口" : "旋轉擋片：打開", "lbl sm acc", "end"));
+    }
+    if (cfg.lock === "bolt") {
+      const bx = 532 + 16 * (1 - st.engaged);
+      o.push(r(bx, 166, 14, 28, st.engaged > 0.5 ? "lock-on" : "lock-off", 'rx="2"'));
+      o.push(tx(552, 158, st.engaged > 0.5 ? "滑鈕：推入 ←" : "側推滑鈕", "lbl sm acc"));
+    }
+    if (cfg.lock === "snapB") {
+      o.push(r(252, st.lockOpen > 0.5 ? 312 : 296, 10, st.lockOpen > 0.5 ? 8 : 24, lc, 'rx="2"'));
+      o.push(tx(266, 342, act ? "下緣卡扣：往上按" : "下緣按壓卡扣", "lbl sm acc"));
+    }
+    if (st.detent) o.push(tx(330, 186, "暫停位：凸點卡住，已不會掉", "lbl flt", "middle"));
+
+    // 標註
+    o.push(`<line x1="${cfg.plane}" y1="34" x2="${cfg.plane}" y2="326" class="cut"/>`);
+    o.push(tx(cfg.plane + 4, 52, "A–A", "cutlbl"));
+    if (st.z > 0.03 && cfg.motion !== "tiltTop") o.push(tx(330 + dx, 186 + ty - (st.detent ? 24 : 0), mode === "install" ? "↓ 放下" : "↑ 拿起", "lbl", "middle"));
+    if (mode === "install") o.push(hArrow(650, 560, 22, "滑入方向")); else o.push(hArrow(560, 650, 22, "取出方向"));
+    return o.join("");
+  }
+
+  /* ---------- 側視圖（X 往右、Z 往上；從下緣看） ---------- */
+  function drawSide(cfg, st) {
+    const o = [];
+    o.push(r(100, 160, 460, 14, "plate"));
+    o.push(r(100, 108, 12, 52, "stop"));
+    o.push(tx(116, 190, "背板", "lbl sm mut"));
+    const dx = st.off, ty = -50 * st.z;
+    const wedgeDrop = cfg.wedge ? 4 * (st.off / S) : 0;   // 楔形：還沒滑到底時平板浮高一點
+    let tr = `translate(${dx.toFixed(1)} ${(ty - wedgeDrop).toFixed(1)})`;
+    const L = ledgeOf(cfg);
+    const ledges = cfg.pins ? [] : L.bot;   // 從下緣看，只畫下緣的凸緣
+    o.push(`<g transform="${tr}">`);
+    o.push(r(112, 112, 418, 44, "tbody", 'rx="6"'));
+    o.push(tx(300, 134, "平板", "lbl sm mut", "middle"));
+    ledges.forEach(s => {
+      if (cfg.wedge) o.push(pg([[s[0], 147], [s[1], 143], [s[1], 156], [s[0], 156]], "ledge"));
+      else o.push(r(s[0], 146, s[1] - s[0], 10, "ledge"));
+    });
+    if (cfg.lock === "plunger") o.push(r(316, 146, 10, 10, "hole"));
+    o.push(`</g>`);
+
+    // 近側牆與卡緣（在平板前面）
+    if (cfg.bot) {
+      o.push(r(112, 136, 418, 24, "wallf"));
+      cfg.bot.forEach(s => {
+        if (cfg.wedge) o.push(pg([[s[0], 136], [s[1], 136], [s[1], 142], [s[0], 146]], "lip"));
+        else o.push(r(s[0], 136, s[1] - s[0], 8, "lip"));
+      });
+      o.push(tx(cfg.bot[cfg.bot.length - 1][1] + 4, 132, "卡緣", "lbl sm"));
+    }
+    if (cfg.pins) {
+      o.push(r(112, 100, 418, 60, "wallf"));
+      cfg.pins.forEach(x => {
+        o.push(r(x + S - 7, 100, 14, 53, "slot"));
+        o.push(r(x - 7, 139, S + 14, 14, "slot"));
+      });
+      o.push(`<g transform="translate(${dx.toFixed(1)} ${ty.toFixed(1)})">`);
+      cfg.pins.forEach(x => o.push(`<circle cx="${x}" cy="146" r="5.5" class="ledge"/>`));
+      o.push(`</g>`);
+      o.push(tx(520, 94, "L 形槽", "lbl sm", "end"));
+      // 旋轉擋片：封住最右邊槽口
+      const fx = PINS[2] + S;
+      if (st.engaged > 0.5) o.push(r(fx - 9, 126, 18, 6, "lock-on"));
+      else o.push(r(fx + 8, 110, 6, 22, "lock-off"));
+    }
+
+    // 鎖定件
+    const lc = st.lockOpen > 0.5 ? "lock-off" : "lock-on";
+    if (cfg.lock === "snap") o.push(st.lockOpen > 0.5 ? r(536, 152, 12, 8, lc) : r(536, 132, 12, 28, lc));
+    if (cfg.lock === "plunger") o.push(st.lockOpen > 0.5 ? r(316, 156, 10, 4, lc) : r(316, 146, 10, 14, lc));
+    if (cfg.lock === "bolt") o.push(r(532 + 16 * (1 - st.engaged), 138, 14, 22, st.engaged > 0.5 ? "lock-on" : "lock-off"));
+    if (cfg.lock === "snapB") o.push(st.lockOpen > 0.5 ? r(252, 152, 8, 8, lc) : r(252, 136, 8, 24, lc));
+    if (cfg.motion === "drop2") {
+      o.push(`<circle cx="${(330 + S / 2).toFixed(1)}" cy="158" r="3.5" class="detent"/>`);
+      if (st.detent) o.push(tx(330, 196, "暫停位（半咬合）", "lbl sm flt", "middle"));
+    }
+    if (cfg.wedge && st.z < 0.05) o.push(tx(330, 196, st.off < 2 ? "楔形拉緊，零間隙" : "斜坡逐漸把平板往下拉", "lbl sm flt", "middle"));
+    return o.join("");
+  }
+
+  /* ---------- 剖面 A–A（Y 往右：上緣在左；Z 往上） ---------- */
+  function tabletPoly(tl, bl, full) {
+    if (full) return [[36, 96], [384, 96], [384, 166], [36, 166]];
+    const p = [[64, 96], [356, 96]];
+    if (bl) p.push([356, 130], [384, 130], [384, 166]); else p.push([356, 166]);
+    if (tl) p.push([36, 166], [36, 130], [64, 130]); else p.push([64, 166]);
+    return p;
+  }
+  function drawSection(cfg, st) {
+    const o = [];
+    const X = cfg.plane;
+    const at = (segs, off) => (segs || []).some(s => overlaps(s[0] + off, s[1] + off, X - 1, X + 1));
+    const L = ledgeOf(cfg);
+    const dx = st.off;
+    const body = overlaps(112 + dx, 530 + dx, X - 1, X + 1);
+
+    // 背板底板
+    o.push(r(20, 168, 380, 16, "s-plate"));
+    const walls = [];   // 卡緣畫在平板之後，才看得到它蓋住凸緣
+    if (cfg.pins) {
+      o.push(r(20, 100, 12, 68, "s-plate"), r(388, 100, 12, 68, "s-plate"));
+    } else {
+      const lipT = at(cfg.top, 0), lipB = at(cfg.bot, 0);
+      walls.push(lipT ? pg([[20, 116], [58, 116], [58, 126], [30, 126], [30, 168], [20, 168]], "s-plate") : r(20, 126, 10, 42, "s-plate"));
+      walls.push(lipB ? pg([[400, 116], [362, 116], [362, 126], [390, 126], [390, 168], [400, 168]], "s-plate") : r(390, 126, 10, 42, "s-plate"));
+      if (lipT) walls.push(tx(22, 108, "卡緣", "lbl sm"));
+    }
+
+    // 平板
+    if (body) {
+      let tr = `translate(0 ${(-60 * st.z).toFixed(1)})`;
+      if (cfg.motion === "tiltTop") tr = `rotate(${(-st.angX).toFixed(2)} 36 166)`;
+      if (cfg.wedge) tr = `translate(0 ${(-60 * st.z - 4 * (st.off / S)).toFixed(1)})`;
+      o.push(`<g transform="${tr}">`);
+      const full = !!cfg.pins;
+      o.push(pg(tabletPoly(at(L.top, st.off), at(L.bot, st.off), full), "s-tablet"));
+      o.push(tx(210, 124, "平板", "lbl sm", "middle"));
+      if (cfg.pins && cfg.pins.some(x => Math.abs(x + dx - X) < 7)) {
+        o.push(r(24, 140, 12, 12, "ledge"), r(384, 140, 12, 12, "ledge"));
+      }
+      o.push(`</g>`);
+    } else {
+      o.push(tx(210, 80, "平板還沒到 A–A 剖面", "lbl mut", "middle"));
+    }
+    o.push(walls.join(""));
+    if (cfg.lock === "plunger" && Math.abs(X - 321) < 4) o.push(r(205, 150, 10, 18, "lock-on"));
+
+    o.push(tx(24, 50, "上緣", "lbl mut"));
+    o.push(tx(396, 50, "下緣", "lbl mut", "end"));
+    const note = {
+      e1: "剖面在卡緣位置：L 形卡緣蓋住平板凸緣",
+      e2: "剖面在角落勾位置",
+      e3: "剖面在側銷位置：側銷伸進側牆的 L 形槽",
+      e4: "斷面同提案 1；楔形斜坡沿滑動方向（看側視圖）",
+      e5: "上緣先斜插進卡緣，再以上緣為支點壓下下緣",
+      e6: "斷面同提案 1；差別在兩段咬合與暫停位"
+    };
+    const it = ITEMS.find(i => i.cfg === cfg);
+    o.push(tx(210, 210, note[it.id], "lbl sm", "middle"));
+    o.push(tx(210, 232, "示意，非比例", "lbl sm mut", "middle"));
+    return o.join("");
+  }
+
+  /* ---------- 介面 ---------- */
+  const $ = id => document.getElementById(id);
+  const front = $("front"), side = $("side"), section = $("section"), stepsEl = $("steps"), scrub = $("scrub"), infoEl = $("info");
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const state = { item: ITEMS[5], mode: "install", t: 1, playing: false, last: 0 };
+  const DUR = { install: 4200, remove: 4200 };
+
+  $("picker").innerHTML = ITEMS.map(it =>
+    `<button type="button" class="chip${it.star ? " star" : ""}" data-id="${it.id}" aria-pressed="false"><span class="n">${it.no}</span>${it.short}</button>`).join("");
+  $("picker").addEventListener("click", e => {
+    const b = e.target.closest(".chip");
+    if (b) select(b.dataset.id, true);
+  });
+
+  function renderInfo(it) {
+    infoEl.innerHTML = `<h2><span class="tag">提案 ${it.no}</span>${it.name}${it.star ? ' <span class="tag" style="color:var(--accent)">★ 建議</span>' : ""}</h2>
+      <section><h3>結構</h3><p>${it.struct}</p></section>
+      <section><h3>裝上</h3><p>${it.install}</p></section>
+      <section class="wide"><h3>Lock</h3><p>${it.lock}</p></section>
+      <section><h3>優點</h3><ul>${it.pros.map(x => `<li>${x}</li>`).join("")}</ul></section>
+      <section><h3>要注意</h3><ul>${it.cons.map(x => `<li>${x}</li>`).join("")}</ul></section>`;
+  }
+
+  function select(id, autoplay) {
+    const it = byId[id] || ITEMS[5];
+    state.item = it;
+    document.querySelectorAll(".chip[data-id]").forEach(c => c.setAttribute("aria-pressed", c.dataset.id === it.id ? "true" : "false"));
+    renderInfo(it);
+    try { history.replaceState(null, "", "#" + it.id); } catch (e) { /* 忽略 */ }
+    if (autoplay && !reduce) play("install");
+    else { state.mode = "install"; state.t = 1; state.playing = false; render(); }
+  }
+
+  function render() {
+    const cfg = state.item.cfg;
+    const st = stateAt(cfg, state.mode, state.t);
+    front.innerHTML = drawFront(cfg, st, state.mode);
+    side.innerHTML = drawSide(cfg, st);
+    section.innerHTML = drawSection(cfg, st);
+    const steps = STEPS[state.item.id][state.mode];
+    let activeFound = false;
+    stepsEl.innerHTML = steps.map((s, i) => {
+      let cls = "";
+      if (state.t >= s[1] || state.t >= 0.999) cls = "done";
+      else if (!activeFound) { cls = "active"; activeFound = true; }
+      return `<li class="${cls}"><span class="k">${i + 1}</span>${s[0]}</li>`;
+    }).join("");
+    scrub.value = Math.round(state.t * 1000);
+    $("scrub-label").textContent = state.mode === "install" ? "裝上進度" : "取出進度";
+    $("btn-pause").textContent = state.playing ? "暫停" : (state.t < 1 ? "繼續" : "重播");
+  }
+
+  function play(mode) {
+    if (reduce) { state.mode = mode; state.t = 1; state.playing = false; render(); return; }
+    state.mode = mode; state.t = 0; state.playing = true; state.last = performance.now();
+    render();
+    requestAnimationFrame(tick);
+  }
+  function tick(now) {
+    if (!state.playing) return;
+    const dt = now - state.last; state.last = now;
+    state.t = Math.min(1, state.t + dt / DUR[state.mode]);
+    if (state.t >= 1) state.playing = false;
+    render();
+    if (state.playing) requestAnimationFrame(tick);
+  }
+
+  $("btn-install").addEventListener("click", () => play("install"));
+  $("btn-remove").addEventListener("click", () => play("remove"));
+  $("btn-pause").addEventListener("click", () => {
+    if (state.playing) { state.playing = false; render(); }
+    else if (state.t < 1) { state.playing = true; state.last = performance.now(); render(); requestAnimationFrame(tick); }
+    else play(state.mode);
+  });
+  scrub.addEventListener("input", () => {
+    state.playing = false;
+    state.t = scrub.value / 1000;
+    render();
+  });
+
+  // 測試用：?id=e3&mode=remove&t=0.5 直接跳到某個狀態
+  const q = new URLSearchParams(location.search);
+  const startId = q.get("id") || (location.hash || "").slice(1);
+  select(byId[startId] ? startId : "e6", false);
+  if (q.get("t")) { state.mode = q.get("mode") === "remove" ? "remove" : "install"; state.t = clamp(+q.get("t")); render(); }
+})();
+</script>
+</body>
+</html>

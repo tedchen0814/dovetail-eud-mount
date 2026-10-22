@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>邊緣卡合 Lock 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: 沿用組合 A 3D 頁 — 上方標題與 6 個提案選單，中間 3D 舞台（浮動視角工具列＋3D 標籤），下方播放控制、步驟、Lock 說明 */
+:root {
+  --bg: #ECEEE9;
+  --panel: #F8F9F6;
+  --ink: #1E2523;
+  --muted: #5B6560;
+  --line: #C6CCC5;
+  --accent: #CF5320;
+  --float: #1C8781;
+  --chip-on: #1E2523;
+  --chip-on-fg: #F8F9F6;
+  --stage: #E4E7E1;
+  --font-display: "Chakra Petch", "Noto Sans TC", system-ui, sans-serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141816; --panel: #1C211F; --ink: #E4E9E5; --muted: #9AA39E; --line: #343C38;
+    --accent: #F07A42; --float: #3FB8B0; --chip-on: #E4E9E5; --chip-on-fg: #141816; --stage: #232926;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141816; --panel: #1C211F; --ink: #E4E9E5; --muted: #9AA39E; --line: #343C38;
+  --accent: #F07A42; --float: #3FB8B0; --chip-on: #E4E9E5; --chip-on-fg: #141816; --stage: #232926;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.wrap {
+  max-width: 1180px; margin: 0 auto; display: grid; gap: 18px;
+  padding-block: 26px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--font-display); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.25; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 74ch; }
+.lede b { color: var(--ink); font-weight: 500; }
+.lede a, footer a { color: var(--accent); }
+
+.picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font: inherit; font-size: 13.5px; border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  padding: 4px 11px; border-radius: 999px; cursor: pointer;
+}
+.chip .n { font-family: var(--font-display); font-weight: 600; margin-right: 4px; }
+.chip.star .n::after { content: " ★"; color: var(--accent); }
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-fg); border-color: var(--chip-on); }
+.chip:focus-visible, .btn:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.stage { position: relative; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--stage); }
+#view { display: block; width: 100%; height: clamp(340px, 62vh, 640px); touch-action: none; }
+.toolbar {
+  position: absolute; top: 10px; left: 10px; right: 10px;
+  display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none;
+}
+.toolbar > * { pointer-events: auto; }
+.sep { width: 1px; background: var(--line); margin: 2px 4px; }
+.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.tag3d {
+  position: absolute; transform: translate(-50%, -100%); white-space: nowrap;
+  font-size: 12.5px; padding: 1px 7px; border-radius: 4px;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+}
+.tag3d.acc { color: var(--accent); border-color: var(--accent); }
+.tag3d.flt { color: var(--float); border-color: var(--float); }
+.hint { position: absolute; bottom: 8px; right: 12px; font-size: 12px; color: var(--muted); pointer-events: none; }
+.status { position: absolute; bottom: 8px; left: 12px; font-size: 13px; font-weight: 500; padding: 2px 9px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); }
+.status.locked { color: var(--accent); border-color: var(--accent); }
+.nogl { padding: 40px 20px; text-align: center; color: var(--muted); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { font: inherit; font-size: 14px; font-weight: 500; border: 1px solid var(--ink); background: var(--ink); color: var(--panel); padding: 7px 16px; border-radius: 6px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.scrub { flex: 1 1 220px; display: flex; gap: 10px; align-items: center; min-width: 0; }
+.scrub input { flex: 1; min-width: 0; accent-color: var(--accent); }
+.scrub span { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.steps { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+.steps li { display: flex; gap: 6px; align-items: baseline; color: var(--muted); }
+.steps li .k { font-family: var(--font-display); font-weight: 600; font-size: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.steps li.done { color: var(--ink); }
+.steps li.active { color: var(--accent); font-weight: 500; }
+.steps li.active .k { border-color: var(--accent); }
+
+.info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 28px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+.info h2 { margin: 0; font-size: 19px; grid-column: 1 / -1; }
+.info h3 { margin: 0 0 4px; font-size: 13px; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+.info p { margin: 0; max-width: 62ch; }
+.info ul { margin: 0; padding-left: 1.2em; }
+.info section { min-width: 0; }
+.info .wide { grid-column: 1 / -1; }
+footer { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 820px) { .info { grid-template-columns: minmax(0, 1fr); } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Edge interlock · Drop &amp; slide · Lock details · 3D</div>
+    <h1>邊緣卡合：6 種 Lock 設計（3D）</h1>
+    <p class="lede">選一個提案，看它的 lock 怎麼上鎖、怎麼解鎖。每個提案都是 <b>先垂直放下、再由右往左滑約 18 mm</b>，滑到底時 lock 動作；取出時先解鎖、往右退、再拿起。拖曳旋轉、滾輪縮放、右鍵平移。結構動畫見 <a href="https://dovetail-eud-mount.vercel.app/edge.html">← 邊緣卡合 6 提案</a></p>
+  </header>
+
+  <nav class="picker" id="picker" aria-label="選擇提案"></nav>
+
+  <section class="stage" aria-label="3D 模型">
+    <canvas id="view" aria-label="Lock 3D 模型"></canvas>
+    <div class="labels" id="labels"></div>
+    <div class="toolbar" role="toolbar" aria-label="視角與顯示">
+      <button type="button" class="chip" data-view="close" aria-pressed="true">Lock 特寫</button>
+      <button type="button" class="chip" data-view="iso" aria-pressed="false">全景</button>
+      <button type="button" class="chip" data-view="top" aria-pressed="false">正上方</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" class="chip" id="t-tab" aria-pressed="true">平板半透明</button>
+      <button type="button" class="chip" id="t-plate" aria-pressed="false">背板半透明</button>
+      <button type="button" class="chip" id="t-lbl" aria-pressed="true">標籤</button>
+    </div>
+    <div class="status" id="status">已鎖定</div>
+    <div class="hint">示意模型，尺寸為估算</div>
+  </section>
+
+  <div class="controls">
+    <button class="btn" id="btn-install" type="button">▶ 裝上＋上鎖</button>
+    <button class="btn ghost" id="btn-remove" type="button">◀ 解鎖＋取出</button>
+    <button class="btn ghost" id="btn-pause" type="button">重播</button>
+    <label class="scrub" for="scrub"><span id="scrub-label">裝上進度</span><input id="scrub" type="range" min="0" max="1000" value="1000"></label>
+  </div>
+  <ol class="steps" id="steps"></ol>
+
+  <section class="info" id="info" aria-live="polite"></section>
+
+  <footer>Claude 2026-10-22 整理的設計概念，不是定案設計，也還沒驗證。尺寸為估算（平板 150 × 85 × 14 mm、短滑行程 18 mm），只示意 lock 的動作原理，不含製程、材料、熱膨脹與強度。</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const canvas = document.getElementById("view");
+  if (!window.THREE || !THREE.OrbitControls) {
+    canvas.outerHTML = '<div class="nogl">3D 函式庫載入失敗，請重新整理頁面。</div>';
+    return;
+  }
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); }
+  catch (e) { canvas.outerHTML = '<div class="nogl">這個瀏覽器無法顯示 WebGL 3D。</div>'; return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+  /* ---------- 尺寸（mm）：X 滑動（平板往 −X 滑入）、Y 上下緣（+Y 上緣）、Z 厚度（平板在 +Z） ---------- */
+  const S = 18;                      // 落下短滑行程
+  const LIFT = 22;                   // 放下前的高度
+  const TW = 150, TH = 85, TT = 14;  // 平板
+  const PX0 = -81, PX1 = 86, PY = 48.5;
+  const SEG = [[-65, -50], [-31, -16], [3, 18], [37, 52]];
+  const CORN = [[-74, -59], [55, 70]];
+  const PINS = [-50, 0, 50];
+
+  /* ---------- 提案資料 ---------- */
+  const ITEMS = [
+    { id: "e1", no: "1", short: "分段卡緣＋彈片卡扣", name: "① 分段卡緣＋彈片自動卡扣",
+      cfg: { motion: "drop", top: SEG, bot: SEG, lock: "snap" },
+      parts: "背板右端一片塑膠彈片（懸臂）：根部連在背板右緣，自由端朝左、上面有一塊擋塊。背板在彈片下方挖空，讓它能往下彎。",
+      lockOn: "平板放下時直接把擋塊壓下去；往左滑，平板右緣一離開擋塊，彈片就彈起，擋塊擋住平板右緣（喀一聲）。",
+      lockOff: "拇指往下壓彈片露在平板外的部分，擋塊沉到平板底面以下，平板就能往右退 18 mm，再垂直拿起。",
+      notes: ["擋塊朝左的面做垂直，負責止退；頂面可以做小圓角，讓平板放下時順利壓下", "按壓區在平板右緣外，戴手套也按得到", "只有一個鎖，被裝備壓到就會解鎖；要保險看提案 6"] },
+    { id: "e2", no: "2", short: "角落勾＋中央柱塞", name: "② 角落勾＋中央彈簧柱塞＋拉環",
+      cfg: { motion: "drop", top: CORN, bot: CORN, lock: "plunger", plateXray: true },
+      parts: "背板中央一顆彈簧柱塞，平板背面對應位置有定位孔；柱塞由背板底下的拉桿連到背板右緣外的拉環。",
+      lockOn: "平板放下時壓下柱塞（柱塞頂部是圓頂）；往左滑到底，定位孔對到柱塞，柱塞自動彈進孔裡。",
+      lockOff: "往右拉拉環，拉桿把柱塞往下拉出定位孔；平板往右退 18 mm，再拿起。放開拉環，柱塞回到待命位置。",
+      notes: ["柱塞在平板正中央下方，不會被外物勾到", "拉環和取出同方向（往右），解鎖和取出可以一手完成", "背板要有空間走拉桿（3D 中背板開半透明才看得到）"] },
+    { id: "e3", no: "3", short: "L 形槽＋旋轉擋片", name: "③ 側壁 L 形槽＋側銷＋旋轉擋片",
+      cfg: { motion: "drop", pins: PINS, lock: "flap" },
+      parts: "背板上下兩側的側牆各開 3 個 L 形槽，平板兩側各 3 支短銷；最右邊的槽口外側有一片旋轉擋片（上下各一片）。",
+      lockOn: "側銷從槽口放下、往左推進水平段後，把擋片往下撥，擋片蓋住垂直段，側銷就退不回槽口。",
+      lockOff: "把擋片往上撥開，平板往右推回垂直段，再垂直拿起。",
+      notes: ["三支銷一起動，只要封住一支銷的退路就夠", "擋片轉軸加止轉凸點，讓它停在開／關兩個位置", "擋片是手動上鎖，忘了撥就沒有鎖，可以再加彈性凸點當最低限度的止退"] },
+    { id: "e4", no: "4", short: "楔形卡緣＋側推滑鈕", name: "④ 楔形卡緣＋側推滑鈕",
+      cfg: { motion: "drop", top: SEG, bot: SEG, wedge: true, lock: "bolt" },
+      parts: "卡緣底面和平板凸緣頂面是沿滑動方向的小斜坡（3D 中斜度放大）；背板右端有一個沿 X 方向滑動的滑鈕。",
+      lockOn: "往左滑時斜坡把平板一路往背板拉緊；滑到底後，拇指把滑鈕往左推，擋塊插進平板右緣和背板右端之間。",
+      lockOff: "把滑鈕往右推回，平板往右推開楔形（第一下比較緊），再拿起。",
+      notes: ["楔形負責消除間隙，滑鈕負責止退，兩件事分開", "滑鈕要有段落感（凸點），避免振動時自己滑開", "滑鈕是手動上鎖"] },
+    { id: "e5", no: "5", short: "上緣斜插＋下緣卡扣", name: "⑤ 上緣連續卡緣斜插＋下緣按壓卡扣",
+      cfg: { motion: "tiltTop", top: [[-74, 70]], topLedge: [[-72, 64]], bot: [[-44, -26], [20, 38]], lock: "snapB" },
+      parts: "下緣一個 L 形卡扣零件：扣塊在平板下緣凸緣的右邊，橫臂跨過下緣側牆（側牆在這裡開缺口），按壓片在下緣牆外。",
+      lockOn: "上緣斜插、下緣壓下時，凸緣把扣塊壓下去；往左滑到底，凸緣離開扣塊，扣塊彈起擋住凸緣往右退。",
+      lockOff: "手指從下緣伸進去，把按壓片往下壓，扣塊沉入背板；往右滑 18 mm，翹起下緣，從上緣抽出。",
+      notes: ["卡扣在下緣中段，和上緣的連續卡緣分工：上緣承力、下緣止退", "橫臂走在平板的側邊溝槽裡，不會擋到平板", "按壓方向（往下）和取出方向不同，不容易誤觸"] },
+    { id: "e6", no: "6", short: "雙段＋卡扣＋保險", name: "⑥ 雙段落下短滑：彈片卡扣＋保險滑鈕＋暫停位", star: true,
+      cfg: { motion: "drop2", top: SEG, bot: SEG, lock: "snap", safety: true, detent: true },
+      parts: "提案 1 的彈片卡扣，加上一個蓋在彈片上方的保險滑鈕（沿 Y 方向滑），以及滑到一半的暫停位凸點。",
+      lockOn: "放下、往左滑：滑到一半凸點卡住（半咬合，已經不會掉）；繼續滑到底，彈片卡扣彈起；最後把保險滑鈕推到彈片上方。",
+      lockOff: "先把保險滑鈕推開，露出彈片；壓下彈片，往右滑（經過暫停位），再拿起。",
+      notes: ["保險滑鈕蓋住彈片時，手指根本按不到彈片，誤觸不會解鎖", "暫停位讓「沒滑到底」也不會掉", "建議方案：自動上鎖＋手動保險，日常好用又安全"] }
+  ];
+  const byId = Object.fromEntries(ITEMS.map(x => [x.id, x]));
+
+  const STEPS = {
+    e1: { install: [["垂直放下（擋塊被壓下）", 0.31], ["往左滑 18 mm", 0.74], ["彈片彈起，擋塊擋住平板右緣", 0.8]],
+          remove: [["壓下彈片", 0.26], ["往右退 18 mm", 0.57], ["垂直拿起", 0.86], ["彈片回到待命位置", 0.97]] },
+    e2: { install: [["垂直放下（柱塞被壓下）", 0.31], ["往左滑 18 mm", 0.74], ["柱塞彈進定位孔", 0.8]],
+          remove: [["往右拉拉環，柱塞縮回", 0.26], ["往右退 18 mm", 0.57], ["垂直拿起", 0.86], ["柱塞回到待命位置", 0.97]] },
+    e3: { install: [["側銷從槽口放下", 0.31], ["往左推進水平段", 0.74], ["撥下旋轉擋片", 0.92]],
+          remove: [["撥開旋轉擋片", 0.2], ["往右推回垂直段", 0.57], ["垂直拿起", 0.86]] },
+    e4: { install: [["垂直放下", 0.31], ["往左滑，楔形拉緊", 0.74], ["推入側推滑鈕", 0.92]],
+          remove: [["推回側推滑鈕", 0.2], ["往右推開楔形", 0.57], ["垂直拿起", 0.86]] },
+    e5: { install: [["上緣斜插進連續卡緣", 0.05], ["壓下下緣（扣塊被壓下）", 0.37], ["往左滑 18 mm", 0.74], ["扣塊彈起止退", 0.8]],
+          remove: [["往下壓下緣按壓片", 0.26], ["往右滑 18 mm", 0.51], ["翹起下緣，從上緣抽出", 0.86], ["卡扣回到待命位置", 0.97]] },
+    e6: { install: [["垂直放下", 0.28], ["滑到暫停位（半咬合）", 0.48], ["繼續滑到底", 0.74], ["彈片卡扣彈起", 0.8], ["推上保險滑鈕", 0.95]],
+          remove: [["推開保險滑鈕", 0.1], ["壓下彈片", 0.26], ["往右滑，經過暫停位", 0.62], ["垂直拿起", 0.86]] }
+  };
+
+  /* ---------- 場景 ---------- */
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, 1, 1, 4000);
+  function makeControls() {
+    const c = new THREE.OrbitControls(camera, canvas);
+    c.enableDamping = true; c.dampingFactor = 0.12;
+    return c;
+  }
+  let controls = makeControls();
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f86, 0.75));
+  const key = new THREE.DirectionalLight(0xffffff, 0.75); key.position.set(120, -160, 240); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.35); rim.position.set(-160, 120, -120); scene.add(rim);
+
+  function mat(color, opts) {
+    return new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.62, metalness: 0.05, side: THREE.DoubleSide }, opts || {}));
+  }
+  const M = {
+    tablet: mat(0xE3B12A, { transparent: true }),
+    ledge: mat(0xC9971A, { transparent: true }),
+    screen: mat(0x1A1F22, { roughness: 0.3, transparent: true }),
+    plate: mat(0x8E968B, { transparent: true }),
+    lip: mat(0x6C7469, { transparent: true }),
+    stop: mat(0x3A403A, { transparent: true }),
+    lock: mat(0xD2541F, { roughness: 0.45 }),
+    safety: mat(0x1C8781, { roughness: 0.45 }),
+    metal: mat(0xA9B1B9, { roughness: 0.35, metalness: 0.6 }),
+    hole: mat(0x2A2410, { transparent: true })
+  };
+
+  // 小工具
+  function box(x0, x1, y0, y1, z0, z1, m) {
+    const g = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0);
+    const mesh = new THREE.Mesh(g, m);
+    mesh.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+    return mesh;
+  }
+  const XZ = new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1); // shape (x, z) 沿 Y 拉伸
+  function prismXZ(pts, y0, y1, m, holes) {
+    const s = new THREE.Shape();
+    s.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) s.lineTo(pts[i][0], pts[i][1]);
+    s.closePath();
+    (holes || []).forEach(h => { const p = new THREE.Path(); p.moveTo(h[0][0], h[0][1]); h.slice(1).forEach(q => p.lineTo(q[0], q[1])); p.closePath(); s.holes.push(p); });
+    const g = new THREE.ExtrudeGeometry(s, { depth: y1 - y0, bevelEnabled: false });
+    g.applyMatrix4(XZ); g.translate(0, y0, 0); g.computeVertexNormals();
+    return new THREE.Mesh(g, m);
+  }
+  const UP = new THREE.Vector3(0, 1, 0);
+  function rodMesh(p1, p2, r, m) {
+    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 14), m);
+    const v = new THREE.Vector3().subVectors(p2, p1), L = v.length();
+    mesh.position.copy(p1).addScaledVector(v, 0.5);
+    mesh.scale.set(1, L, 1);
+    mesh.quaternion.setFromUnitVectors(UP, v.normalize());
+    return mesh;
+  }
+  const mirrorY = (fn) => [fn(1), fn(-1)];   // 上下緣對稱
+
+  /* ---------- 依提案建模型 ---------- */
+  let root = null;
+  const R = {};   // 目前提案的可動零件
+  function clearRoot() {
+    if (!root) return;
+    scene.remove(root);
+    root.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+    root = null;
+  }
+
+  function build(cfg) {
+    clearRoot();
+    root = new THREE.Group(); scene.add(root);
+    for (const k in R) delete R[k];
+    const plate = new THREE.Group(); root.add(plate);
+
+    // 背板底板（右端彈片與下緣卡扣處挖空）
+    if (cfg.lock === "snap") {
+      plate.add(box(PX0, 75.8, -PY, PY, -3, 0, M.plate));
+      plate.add(box(75.8, PX1, 11.6, PY, -3, 0, M.plate), box(75.8, PX1, -PY, -11.6, -3, 0, M.plate));
+    } else if (cfg.lock === "snapB") {
+      plate.add(box(PX0, -26, -PY, PY, -3, 0, M.plate), box(-22, PX1, -PY, PY, -3, 0, M.plate));
+      plate.add(box(-26, -22, -36, PY, -3, 0, M.plate));
+    } else if (cfg.lock === "plunger") {
+      plate.add(box(PX0, -3.4, -PY, PY, -3, 0, M.plate), box(3.4, PX1, -PY, PY, -3, 0, M.plate));
+      plate.add(box(-3.4, 3.4, 3.4, PY, -3, 0, M.plate), box(-3.4, 3.4, -PY, -3.4, -3, 0, M.plate));
+    } else {
+      plate.add(box(PX0, PX1, -PY, PY, -3, 0, M.plate));
+    }
+    // 左端擋牆
+    plate.add(box(PX0, PX0 + 4, -PY, PY, 0, 10, M.stop));
+
+    // 側牆與卡緣
+    if (cfg.pins) {
+      // 側牆上的 L 形槽：外形沿頂邊挖出 L 形缺口
+      const pts = [[PX0 + 4, 0], [PX1, 0], [PX1, 12]];
+      [...PINS].reverse().forEach(p => {
+        pts.push([p + S + 2.6, 12], [p + S + 2.6, 1.4], [p - 2.6, 1.4], [p - 2.6, 5.6], [p + S - 2.6, 5.6], [p + S - 2.6, 12]);
+      });
+      pts.push([PX0 + 4, 12]);
+      plate.add(prismXZ(pts, 43, 46.5, M.plate), prismXZ(pts, -46.5, -43, M.plate));
+    } else {
+      mirrorY(sg => {
+        const top = sg > 0;
+        const lips = top ? cfg.top : cfg.bot;
+        // 側牆（下緣卡扣處開缺口）
+        const wallSegs = (!top && cfg.lock === "snapB") ? [[PX0 + 4, -26], [-22, PX1]] : [[PX0 + 4, PX1]];
+        wallSegs.forEach(w => plate.add(box(w[0], w[1], sg > 0 ? 43 : -46.5, sg > 0 ? 46.5 : -43, 0, 5, M.plate)));
+        lips.forEach(s => {
+          if (cfg.wedge) {
+            // 楔形：卡緣底面往左（−X）降低，斜度放大顯示
+            const m = prismXZ([[s[0], 4.4], [s[1], 5.6], [s[1], 6.6], [s[0], 6.6]], sg > 0 ? 40 : -46.5, sg > 0 ? 46.5 : -40, M.lip);
+            plate.add(m);
+          } else {
+            plate.add(box(s[0], s[1], sg > 0 ? 40 : -46.5, sg > 0 ? 46.5 : -40, 5, 6.6, M.lip));
+          }
+        });
+      });
+    }
+
+    // 平板
+    const tabPivot = new THREE.Group(); root.add(tabPivot);
+    const tab = new THREE.Group(); tabPivot.add(tab);
+    if (cfg.motion === "tiltTop") { tabPivot.position.set(0, 41, 0); tab.position.set(0, -41, 0); }
+    R.tabPivot = tabPivot;
+    if (cfg.pins) {
+      tab.add(box(-TW / 2, TW / 2, -TH / 2, TH / 2, 0.3, TT, M.tablet));
+      PINS.forEach(p => mirrorY(sg => tab.add(rodMesh(new THREE.Vector3(p, sg * 41, 3.5), new THREE.Vector3(p, sg * 45.6, 3.5), 1.8, M.ledge))));
+    } else {
+      tab.add(box(-TW / 2, TW / 2, -39.5, 39.5, 0.3, TT, M.tablet));
+      mirrorY(sg => tab.add(box(-TW / 2, TW / 2, sg > 0 ? 39.5 : -42.5, sg > 0 ? 42.5 : -39.5, 7, TT, M.tablet)));
+      const tl = cfg.topLedge || cfg.top, bl = cfg.bot;
+      [[tl, 1], [bl, -1]].forEach(([segs, sg]) => segs.forEach(s => {
+        const y0 = sg > 0 ? 39.5 : -42.5, y1 = sg > 0 ? 42.5 : -39.5;
+        if (cfg.wedge) tab.add(prismXZ([[s[0], 0.6], [s[1], 0.6], [s[1], 5.3], [s[0], 4.1]], y0, y1, M.ledge));
+        else tab.add(box(s[0], s[1], y0, y1, 0.6, 4.4, M.ledge));
+      }));
+    }
+    const scr = new THREE.Mesh(new THREE.PlaneGeometry(TW - 22, TH - 16), M.screen);
+    scr.position.z = TT + 0.05; tab.add(scr);
+
+    // Lock 零件
+    if (cfg.lock === "snap") {
+      // 彈片：根部在 x=86，自由端朝左；擋塊在自由端上方
+      const sp = new THREE.Group(); sp.position.set(PX1, 0, -1.5); root.add(sp);
+      sp.add(box(76.3 - PX1, 0, -11, 11, -1.2, 0.3, M.lock));
+      sp.add(box(76.3 - PX1, 79 - PX1, -11, 11, 0.3, 5.5, M.lock));      // 擋塊（頂面 z≈4）
+      [-6, 0, 6].forEach(y => sp.add(box(81.5 - PX1, 84 - PX1, y - 1.5, y + 1.5, 0.3, 0.9, M.lock)));  // 按壓止滑紋
+      R.spring = sp;
+      if (cfg.safety) {
+        const sf = new THREE.Group(); root.add(sf);
+        sf.add(box(78, 85.5, -7, 7, 6.2, 7.6, M.safety));     // 蓋在彈片上方的橋
+        sf.add(box(78, 85.5, 7, 9.5, 0, 7.6, M.safety));      // 立柱
+        sf.add(box(83, 85.5, -1.5, 1.5, 7.6, 9.2, M.safety)); // 撥鈕
+        plate.add(box(77.5, 86, 12.5, 32, 0, 0.8, M.plate));  // 滑軌
+        R.safety = sf;
+      }
+    }
+    if (cfg.lock === "plunger") {
+      R.plunger = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 2.8, 8, 28), M.lock);
+      R.plunger.rotation.x = Math.PI / 2; root.add(R.plunger);
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(2.8, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), M.lock);
+      tip.position.y = 4; R.plunger.add(tip);
+      R.link = new THREE.Group(); root.add(R.link);
+      R.link.add(rodMesh(new THREE.Vector3(0, 0, -6.5), new THREE.Vector3(92, 0, -6.5), 1, M.lock));
+      R.link.add(rodMesh(new THREE.Vector3(92, 0, -6.5), new THREE.Vector3(92, 0, -2), 1, M.lock));
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(4.5, 1.1, 14, 36), M.lock);
+      ring.rotation.x = Math.PI / 2; ring.position.set(96.5, 0, -2); R.link.add(ring);
+      const hole = new THREE.Mesh(new THREE.CircleGeometry(3.3, 32), M.hole);
+      hole.position.set(0, 0, 0.28); hole.rotation.y = Math.PI; tab.add(hole);
+    }
+    if (cfg.lock === "flap") {
+      R.flaps = mirrorY(sg => {
+        const f = new THREE.Group(); f.position.set(74.5, sg * 47.3, 9); root.add(f);
+        f.add(box(-10, 0, -0.7, 0.7, -1.8, 1.8, M.lock));
+        const pin = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 2.4, 16), M.metal);
+        f.add(pin);
+        return f;
+      });
+    }
+    if (cfg.lock === "bolt") {
+      R.bolt = new THREE.Group(); root.add(R.bolt);
+      R.bolt.add(box(0, 10, -9, 9, 0.1, 5.5, M.lock));
+      R.bolt.add(box(6, 9, -5, 5, 5.5, 8, M.lock));      // 拇指撥鈕
+      plate.add(box(75.5, PX1, 9.5, 12, 0, 3, M.plate), box(75.5, PX1, -12, -9.5, 0, 3, M.plate));
+    }
+    if (cfg.lock === "snapB") {
+      R.snapB = new THREE.Group(); root.add(R.snapB);
+      R.snapB.add(box(-25.6, -22.4, -42.6, -39.6, 0, 5.2, M.lock));    // 扣塊
+      R.snapB.add(box(-25.6, -22.4, -50, -39.6, 5.2, 6.5, M.lock));    // 橫臂（走在平板側溝裡）
+      R.snapB.add(box(-27.5, -20.5, -53, -49, 2.5, 6.5, M.lock));      // 按壓片
+    }
+    if (cfg.detent) {
+      const b = new THREE.Mesh(new THREE.SphereGeometry(1.3, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), M.safety);
+      b.rotation.x = Math.PI / 2; b.position.set(-40, -41, 0); root.add(b);
+    }
+    R.tab = tab;
+    applyMaterials();
+  }
+
+  /* ---------- 時間軸 ---------- */
+  const clamp = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const ease = t => { t = clamp(t); return t * t * (3 - 2 * t); };
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  const overlaps = (a1, a2, b1, b2) => a1 < b2 && b1 < a2;
+  const MANUAL_LOCK = { flap: true, bolt: true };
+
+  function motion(cfg, u) {
+    const m = { off: 0, lift: 0, ang: 0 };
+    if (cfg.motion === "drop") {
+      m.lift = LIFT * (1 - ease(seg(u, 0, 0.42)));
+      m.off = S * (1 - ease(seg(u, 0.5, 1)));
+    } else if (cfg.motion === "drop2") {
+      m.lift = LIFT * (1 - ease(seg(u, 0, 0.38)));
+      m.off = S - S / 2 * ease(seg(u, 0.44, 0.65)) - S / 2 * ease(seg(u, 0.78, 1));
+    } else if (cfg.motion === "tiltTop") {
+      m.ang = 11 * (1 - ease(seg(u, 0, 0.5)));
+      m.off = S * (1 - ease(seg(u, 0.6, 1)));
+    }
+    return m;
+  }
+
+  const st = { item: ITEMS[5], mode: "install", t: 1, playing: false, last: 0 };
+  function stateNow() {
+    const cfg = st.item.cfg, t = st.t;
+    let u, manual = 0, engaged = 1, safety = 0;
+    if (st.mode === "install") {
+      u = seg(t, 0, 0.74);
+      if (MANUAL_LOCK[cfg.lock]) engaged = ease(seg(t, 0.8, 0.92));
+      if (cfg.safety) safety = ease(seg(t, 0.84, 0.95));
+    } else {
+      u = 1 - seg(t, 0.28, 0.86);
+      if (cfg.safety) safety = 1 - ease(seg(t, 0, 0.1));
+      if (MANUAL_LOCK[cfg.lock]) engaged = 1 - ease(seg(t, 0.06, 0.2));
+      else manual = t < 0.88 ? ease(seg(t, 0.12, 0.24)) : 1 - ease(seg(t, 0.88, 0.97));
+    }
+    return Object.assign(motion(cfg, u), { manual, engaged, safety });
+  }
+
+  function applyState() {
+    const cfg = st.item.cfg, s = stateNow();
+    R.tabPivot.position.x = s.off;
+    if (cfg.motion === "tiltTop") { R.tabPivot.position.z = 0; R.tabPivot.rotation.x = -THREE.MathUtils.degToRad(s.ang); }
+    else R.tabPivot.position.z = s.lift;
+    let locked = false;
+
+    if (cfg.lock === "snap") {
+      // 擋塊頂面原本在 z≈4；平板蓋在上面時被壓到平板底面高度；手壓時壓到底
+      const covered = 75 + s.off > 76.6 && 75 + s.off - TW < 79;
+      let top = 4;
+      if (covered) top = Math.min(4, s.lift + 0.3);
+      top = Math.min(top, 4 - 4.6 * s.manual);
+      const drop = 4 - top;
+      R.spring.rotation.y = -Math.asin(clamp(drop / 9.7));   // 繞根部往下彎（自由端在 −X）
+      locked = s.off < 0.5 && s.lift < 0.5 && drop < 0.5;
+      if (R.safety) R.safety.position.y = 22 * (1 - s.safety);
+    }
+    if (cfg.lock === "plunger") {
+      const aligned = Math.abs(s.off) < 1;
+      let top = 2.6;
+      if (!aligned && s.lift < 2.6) top = Math.max(0.2, s.lift + 0.2);
+      top = Math.min(top, 2.6 - 2.6 * s.manual);
+      R.plunger.position.set(0, 0, top - 4 - 2.8 + 0.1);
+      R.link.position.x = 6 * s.manual;
+      locked = aligned && s.lift < 0.5 && top > 1.5;
+    }
+    if (cfg.lock === "flap") {
+      // 打開時往上轉 90°
+      R.flaps.forEach(f => { f.rotation.y = (1 - s.engaged) * Math.PI / 2; });
+      locked = s.engaged > 0.5;
+    }
+    if (cfg.lock === "bolt") {
+      R.bolt.position.x = 75.3 + 10 * (1 - s.engaged);
+      locked = s.engaged > 0.5;
+    }
+    if (cfg.lock === "snapB") {
+      // 下緣凸緣 [-44,-26] 經過扣塊時把扣塊壓下
+      const bottomLift = 83.5 * Math.sin(THREE.MathUtils.degToRad(s.ang));
+      const covered = overlaps(-44 + s.off, -26 + s.off, -25.6, -22.4);
+      let dz = 0;
+      if (covered) dz = -Math.max(0, 4.8 - bottomLift);
+      dz = Math.min(dz, -4.9 * s.manual);
+      R.snapB.position.z = dz;
+      locked = s.off < 0.5 && s.ang < 0.5 && dz > -0.5;
+    }
+    const statusEl = document.getElementById("status");
+    const safe = cfg.safety ? (s.safety > 0.5 ? "＋保險 ON" : "") : "";
+    statusEl.textContent = locked ? "已鎖定" + safe : (s.lift > 0.5 || s.ang > 0.5 ? "平板未放下" : (s.off > 0.5 ? (cfg.detent && Math.abs(s.off - S / 2) < 1 ? "暫停位（半咬合）" : "滑動中") : "未鎖定"));
+    statusEl.classList.toggle("locked", locked);
+
+    const list = STEPS[st.item.id][st.mode];
+    let found = false;
+    document.getElementById("steps").innerHTML = list.map((x, i) => {
+      let cls = "";
+      if (st.t >= x[1] || st.t >= 0.999) cls = "done";
+      else if (!found) { cls = "active"; found = true; }
+      return `<li class="${cls}"><span class="k">${i + 1}</span>${x[0]}</li>`;
+    }).join("");
+    document.getElementById("scrub").value = Math.round(st.t * 1000);
+    document.getElementById("scrub-label").textContent = st.mode === "install" ? "裝上進度" : "取出進度";
+    document.getElementById("btn-pause").textContent = st.playing ? "暫停" : (st.t < 1 ? "繼續" : "重播");
+  }
+
+  /* ---------- 標籤 ---------- */
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const LABELS = {
+    e1: [["彈片卡扣：往下壓解鎖", () => V(83, -11, 1), "acc"], ["卡緣", () => V(-57, -46.5, 7), ""], ["平板凸緣", () => V(44.5 + stNow().off, -42.5, 2 + stNow().lift), ""], ["左端擋牆", () => V(-79, -PY, 10), ""]],
+    e2: [["柱塞", () => V(0, 0, 3), "acc"], ["拉環：往右拉解鎖", () => V(97 + 6 * stNow().manual, 0, 3), "acc"], ["拉桿（背板底下）", () => V(50, 0, -7), "acc"], ["角落勾", () => V(62, -46.5, 7), ""]],
+    e3: [["旋轉擋片", () => V(70, -47.5, 12), "acc"], ["L 形槽", () => V(9 + 18, -46.5, 13), ""], ["側銷", () => V(stNow().off, -45.6, 3.5 + stNow().lift), ""]],
+    e4: [["側推滑鈕：往左推入", () => V(80 + 10 * (1 - stNow().engaged), 0, 8), "acc"], ["楔形卡緣（斜度放大）", () => V(44.5, -46.5, 7), ""]],
+    e5: [["下緣卡扣：往下壓解鎖", () => V(-24, -51, 7), "acc"], ["上緣連續卡緣", () => V(0, 46.5, 7), ""], ["下緣短卡緣", () => V(29, -46.5, 7), ""]],
+    e6: [["彈片卡扣", () => V(83, -11, 1), "acc"], ["保險滑鈕", () => V(84, 22 * (1 - stNow().safety), 9.5), "flt"], ["暫停位凸點", () => V(-40, -41, 1.5), "flt"], ["卡緣", () => V(-57, -46.5, 7), ""]]
+  };
+  function stNow() { return stateNow(); }
+  const labelsEl = document.getElementById("labels");
+  let tags = [], showLabels = true;
+  function buildLabels() {
+    labelsEl.innerHTML = "";
+    tags = LABELS[st.item.id].map(([t, p, cls]) => {
+      const el = document.createElement("div"); el.className = "tag3d " + cls; el.textContent = t; labelsEl.appendChild(el);
+      return { el, p };
+    });
+  }
+  const tmpV = new THREE.Vector3();
+  function placeLabels(w, h) {
+    labelsEl.hidden = !showLabels;
+    if (!showLabels) return;
+    tags.forEach(tg => {
+      tmpV.copy(tg.p()).project(camera);
+      const vis = tmpV.z < 1 && Math.abs(tmpV.x) < 1.05 && Math.abs(tmpV.y) < 1.05;
+      tg.el.style.display = vis ? "" : "none";
+      if (vis) { tg.el.style.left = ((tmpV.x + 1) / 2 * w) + "px"; tg.el.style.top = ((1 - tmpV.y) / 2 * h) + "px"; }
+    });
+  }
+
+  /* ---------- 視角與顯示（特寫：每個提案對準自己的 lock） ---------- */
+  const CLOSE = {
+    e1: { pos: [175, -145, 115], tgt: [62, -4, 2] },
+    e2: { pos: [150, -190, 110], tgt: [40, 0, -2] },
+    e3: { pos: [150, -170, 75], tgt: [50, -45, 5] },
+    e4: { pos: [175, -150, 100], tgt: [55, -18, 3] },
+    e5: { pos: [25, -175, 80], tgt: [-18, -40, 3] },
+    e6: { pos: [180, -140, 125], tgt: [60, 2, 3] }
+  };
+  let curView = "close";
+  function setView(name) {
+    curView = name;
+    const v = name === "close" ? CLOSE[st.item.id] : name === "top" ? { pos: [5, -1, 330], tgt: [5, 0, 0], up: [0, 1, 0] } : { pos: [180, -230, 190], tgt: [5, 0, 0] };
+    const up = v.up || [0, 0, 1];
+    camera.up.set(up[0], up[1], up[2]);
+    controls.dispose(); controls = makeControls();
+    camera.position.set(v.pos[0], v.pos[1], v.pos[2]);
+    controls.target.set(v.tgt[0], v.tgt[1], v.tgt[2]);
+    controls.update();
+    document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === name ? "true" : "false"));
+  }
+  let tabXray = true, plateXray = false;
+  function applyMaterials() {
+    [M.tablet, M.screen].forEach(m => { m.opacity = tabXray ? 0.2 : 1; m.depthWrite = !tabXray; });
+    M.ledge.opacity = tabXray ? 0.8 : 1;
+    M.hole.opacity = tabXray ? 0.9 : 1;
+    [M.plate, M.lip, M.stop].forEach(m => { m.opacity = plateXray ? 0.3 : 1; m.depthWrite = !plateXray; });
+    document.getElementById("t-tab").setAttribute("aria-pressed", tabXray ? "true" : "false");
+    document.getElementById("t-plate").setAttribute("aria-pressed", plateXray ? "true" : "false");
+  }
+  document.querySelector(".toolbar").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.view) setView(b.dataset.view);
+    else if (b.id === "t-tab") { tabXray = !tabXray; applyMaterials(); }
+    else if (b.id === "t-plate") { plateXray = !plateXray; applyMaterials(); }
+    else if (b.id === "t-lbl") { showLabels = !showLabels; b.setAttribute("aria-pressed", showLabels ? "true" : "false"); }
+  });
+
+  /* ---------- 提案切換與說明 ---------- */
+  const picker = document.getElementById("picker");
+  picker.innerHTML = ITEMS.map(it => `<button type="button" class="chip${it.star ? " star" : ""}" data-id="${it.id}" aria-pressed="false"><span class="n">${it.no}</span>${it.short}</button>`).join("");
+  picker.addEventListener("click", e => { const b = e.target.closest("[data-id]"); if (b) select(b.dataset.id, true); });
+  function renderInfo(it) {
+    document.getElementById("info").innerHTML = `<h2>${it.name}${it.star ? ' <span style="color:var(--accent);font-size:13px">★ 建議</span>' : ""}</h2>
+      <section class="wide"><h3>Lock 構成</h3><p>${it.parts}</p></section>
+      <section><h3>上鎖</h3><p>${it.lockOn}</p></section>
+      <section><h3>解鎖</h3><p>${it.lockOff}</p></section>
+      <section class="wide"><h3>設計重點</h3><ul>${it.notes.map(x => `<li>${x}</li>`).join("")}</ul></section>`;
+  }
+  function select(id, autoplay) {
+    st.item = byId[id] || ITEMS[5];
+    document.querySelectorAll("[data-id]").forEach(c => c.setAttribute("aria-pressed", c.dataset.id === st.item.id ? "true" : "false"));
+    plateXray = !!st.item.cfg.plateXray;
+    build(st.item.cfg);
+    buildLabels();
+    renderInfo(st.item);
+    setView("close");
+    try { history.replaceState(null, "", "#" + st.item.id); } catch (e) { /* 忽略 */ }
+    if (autoplay && !reduce) play("install"); else { st.mode = "install"; st.t = 1; st.playing = false; applyState(); }
+  }
+
+  /* ---------- 播放 ---------- */
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const DUR = { install: 4600, remove: 4600 };
+  function play(mode) {
+    st.mode = mode;
+    if (reduce) { st.t = 1; st.playing = false; applyState(); return; }
+    st.t = 0; st.playing = true; st.last = performance.now(); applyState();
+  }
+  document.getElementById("btn-install").addEventListener("click", () => play("install"));
+  document.getElementById("btn-remove").addEventListener("click", () => play("remove"));
+  document.getElementById("btn-pause").addEventListener("click", () => {
+    if (st.playing) st.playing = false;
+    else if (st.t < 1) { st.playing = true; st.last = performance.now(); }
+    else play(st.mode);
+    applyState();
+  });
+  document.getElementById("scrub").addEventListener("input", e => { st.playing = false; st.t = e.target.value / 1000; applyState(); });
+
+  /* ---------- 主題與尺寸 ---------- */
+  function syncTheme() {
+    const css = getComputedStyle(document.documentElement);
+    renderer.setClearColor(new THREE.Color(css.getPropertyValue("--stage").trim() || "#E4E7E1"));
+  }
+  if (window.matchMedia) {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (mq.addEventListener) mq.addEventListener("change", syncTheme);
+  }
+  new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  syncTheme();
+
+  function resize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.floor(w * renderer.getPixelRatio()) || canvas.height !== Math.floor(h * renderer.getPixelRatio())) {
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+    }
+    return [w, h];
+  }
+  function frame(now) {
+    if (st.playing) {
+      st.t = Math.min(1, st.t + (now - st.last) / DUR[st.mode]);
+      st.last = now;
+      if (st.t >= 1) st.playing = false;
+      applyState();
+    }
+    const [w, h] = resize();
+    controls.update();
+    renderer.render(scene, camera);
+    placeLabels(w, h);
+    requestAnimationFrame(frame);
+  }
+
+  // 測試用網址參數：?id=e3&mode=remove&t=0.5&view=iso&tab=0&plate=1
+  const q = new URLSearchParams(location.search);
+  const startId = q.get("id") || (location.hash || "").slice(1);
+  select(byId[startId] ? startId : "e6", false);
+  if (q.get("tab") === "0") { tabXray = false; applyMaterials(); }
+  if (q.get("plate") === "1") { plateXray = true; applyMaterials(); }
+  if (q.get("view")) setView(q.get("view"));
+  if (q.get("mode")) st.mode = q.get("mode") === "remove" ? "remove" : "install";
+  if (q.get("t")) st.t = clamp(parseFloat(q.get("t")) || 0);
+  applyState();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

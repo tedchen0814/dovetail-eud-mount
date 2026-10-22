@@ -5,7 +5,9 @@ const out = path.join(__dirname, 'dist');
 fs.mkdirSync(out, { recursive: true });
 const pages = [
   ['鳩尾槽提案動畫.html', 'index.html'],
-  ['組合A_3D.html', 'combo-a-3d.html']
+  ['組合A_3D.html', 'combo-a-3d.html'],
+  ['邊緣卡合提案動畫.html', 'edge.html'],
+  ['邊緣卡合_Lock_3D.html', 'edge-lock-3d.html']
 ];
 for (const [src, dst] of pages) {
   const html = fs.readFileSync(path.join(__dirname, src), 'utf8');
