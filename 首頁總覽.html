@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>胸掛 EUD 快拆提案</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: 總覽首頁 — 導覽列、標題，兩張方向卡片並排（斷面示意圖、入口按鈕、提案索引），手機改上下疊 */
+:root {
+  --bg: #ECEEE9;
+  --panel: #F8F9F6;
+  --ink: #1E2523;
+  --muted: #5B6560;
+  --line: #C6CCC5;
+  --plate: #9AA197;
+  --plate-dark: #6C7469;
+  --tablet: #E3B12A;
+  --tablet-dark: #A87F0F;
+  --accent: #CF5320;
+  --chip-on: #1E2523;
+  --chip-on-fg: #F8F9F6;
+  --font-display: "Chakra Petch", "Noto Sans TC", system-ui, sans-serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141816; --panel: #1C211F; --ink: #E4E9E5; --muted: #9AA39E; --line: #343C38;
+    --plate: #737B71; --plate-dark: #565E55; --tablet: #D6A622; --tablet-dark: #F0C24A; --accent: #F07A42;
+    --chip-on: #E4E9E5; --chip-on-fg: #141816;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141816; --panel: #1C211F; --ink: #E4E9E5; --muted: #9AA39E; --line: #343C38;
+  --plate: #737B71; --plate-dark: #565E55; --tablet: #D6A622; --tablet-dark: #F0C24A; --accent: #F07A42;
+  --chip-on: #E4E9E5; --chip-on-fg: #141816;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.wrap {
+  max-width: 1180px; margin: 0 auto; display: grid; gap: 22px;
+  padding-block: 26px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.sitenav { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.sitenav a { color: var(--ink); text-decoration: none; padding: 3px 10px; border-radius: 6px; white-space: nowrap; }
+.sitenav a:hover { background: var(--panel); }
+.sitenav a[aria-current="page"] { background: var(--chip-on); color: var(--chip-on-fg); }
+.sitenav .brand { font-family: var(--font-display); font-weight: 600; padding-left: 0; margin-right: auto; }
+.sitenav .brand:hover { background: none; text-decoration: underline; }
+.navgrp { display: flex; gap: 2px; align-items: center; }
+.navlbl { color: var(--muted); font-size: 12.5px; margin-right: 4px; }
+
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--font-display); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.25; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 70ch; }
+
+.dirs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.dir { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.dir h2 { margin: 0; font-size: 21px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.dir h2 .tag { font-family: var(--font-display); font-size: 12px; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+.dir p { margin: 0; color: var(--muted); }
+.dir p b { color: var(--ink); font-weight: 500; }
+.dir svg { width: 100%; height: auto; display: block; background: var(--bg); border-radius: 8px; }
+.go { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: inherit; font-size: 14px; font-weight: 500; border: 1px solid var(--ink); background: var(--ink); color: var(--panel); padding: 7px 16px; border-radius: 6px; text-decoration: none; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:focus-visible, .idx a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.idx { border-collapse: collapse; width: 100%; font-size: 14px; }
+.idx th, .idx td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.idx th { font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.idx tr.grp td { font-family: var(--font-display); font-size: 12px; letter-spacing: .08em; color: var(--muted); padding-top: 10px; }
+.idx td.num { font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+.idx td.lk { white-space: nowrap; text-align: right; }
+.idx a { color: var(--accent); text-decoration: none; margin-left: 10px; }
+.idx a:hover { text-decoration: underline; }
+.idx .pend { color: var(--muted); margin-left: 10px; font-size: 12.5px; }
+.idx tr:last-child td { border-bottom: 0; }
+
+/* 斷面示意 */
+.s-tab { fill: var(--tablet); fill-opacity: .45; stroke: var(--tablet-dark); stroke-width: 1.5; }
+.s-plate { fill: var(--plate); stroke: var(--plate-dark); stroke-width: 1.5; }
+.s-lbl { font-family: var(--font-body); font-size: 12.5px; fill: var(--muted); }
+footer { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 860px) { .dirs { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="sitenav" aria-label="網站導覽">
+    <a class="brand" href="./" aria-current="page">胸掛 EUD 快拆提案</a>
+    <div class="navgrp"><span class="navlbl">中央軌道</span><a href="rail.html">2D 結構</a><a href="rail-3d.html">3D</a></div>
+    <div class="navgrp"><span class="navlbl">邊緣卡合</span><a href="edge.html">2D 結構</a><a href="edge-3d.html">3D</a></div>
+  </nav>
+
+  <header>
+    <div class="eyebrow">Chest Mount × 5" EUD · Quick-release concepts</div>
+    <h1>胸掛 EUD 平板快拆機構：設計提案</h1>
+    <p class="lede">5 吋平板裝到胸掛背板的快拆結構，平板一律<b>由右往左</b>滑入。依卡合位置分成兩個方向，各有 2D 結構動畫與 3D 頁。</p>
+  </header>
+
+  <div class="dirs">
+    <section class="dir" aria-labelledby="d1">
+      <h2 id="d1"><span class="tag">方向一</span>中央軌道</h2>
+      <p>平板後蓋上做鳩尾公軌、翻板上做母槽，從右端一路滑到底。<b>10 個提案＋3 組合</b>：R 是軌道結構、L 是鎖定／補強模組，兩類搭配成組合。</p>
+      <svg viewBox="0 0 360 120" role="img" aria-label="中央軌道斷面示意：平板後蓋兩條鳩尾公軌插進翻板母槽">
+        <rect x="40" y="18" width="280" height="40" rx="4" class="s-tab"/>
+        <polygon points="96,58 124,58 132,72 88,72" class="s-tab"/>
+        <polygon points="236,58 264,58 272,72 228,72" class="s-tab"/>
+        <path d="M60 62 H84 L92 76 H128 L136 62 H224 L232 76 H268 L276 62 H300 V100 H60 Z" class="s-plate"/>
+        <text x="180" y="42" class="s-lbl" text-anchor="middle">平板後蓋＋公軌</text>
+        <text x="180" y="92" class="s-lbl" text-anchor="middle">翻板（母槽）</text>
+      </svg>
+      <div class="go"><a class="btn" href="rail.html">2D 結構動畫</a><a class="btn ghost" href="rail-3d.html">3D</a></div>
+      <table class="idx">
+        <thead><tr><th>#</th><th>提案</th><th></th></tr></thead>
+        <tbody id="idx-rail"></tbody>
+      </table>
+    </section>
+
+    <section class="dir" aria-labelledby="d2">
+      <h2 id="d2"><span class="tag">方向二</span>邊緣卡合</h2>
+      <p>平板和背板邊緣互卡，參考 NP-F 電池：<b>先垂直放下、再由右往左短滑</b>就咬合。<b>6 個提案</b>，每個都是結構＋lock 的完整方案。</p>
+      <svg viewBox="0 0 360 120" role="img" aria-label="邊緣卡合斷面示意：背板兩側 L 形卡緣蓋住平板邊緣凸緣">
+        <polygon points="62,18 298,18 298,56 312,56 312,78 48,78 48,56 62,56" class="s-tab"/>
+        <path d="M30 100 V44 H70 V52 H40 V80 H320 V52 H290 V44 H330 V100 Z" class="s-plate"/>
+        <text x="180" y="40" class="s-lbl" text-anchor="middle">平板（邊緣凸緣）</text>
+        <text x="180" y="95" class="s-lbl" text-anchor="middle">背板（L 形卡緣）</text>
+      </svg>
+      <div class="go"><a class="btn" href="edge.html">2D 結構動畫</a><a class="btn ghost" href="edge-3d.html">3D</a></div>
+      <table class="idx">
+        <thead><tr><th>#</th><th>提案</th><th></th></tr></thead>
+        <tbody id="idx-edge"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <footer>Claude 2026-10-21～22 整理的設計概念，不是定案設計，也還沒驗證；尺寸為估算，不含製程、材料與強度評估。</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  // [id, 編號, 名稱, 有沒有 3D]；3D 補做後把最後一欄改成 true
+  const RAIL = [
+    ["R · 軌道結構", [["p1", "R1", "單軌長滑軌＋右端彈簧舌片"], ["p2", "R2", "單軌＋一體撓性懸臂自扣"], ["p3", "R3", "後蓋內凹母槽＋翻板凸軌"],
+      ["p4", "R4", "雙軌主從軌"], ["p5", "R5", "雙軌外八大鳩尾＋彈簧浮動下爪"], ["p6", "R6", "雙軌開窗 Drop-in＋短行程"]]],
+    ["L · 鎖定／補強", [["p7", "L1", "中央彈簧柱塞＋右端拉環"], ["p8", "L2", "上下雙鎖舌連動"], ["p9", "L3", "自動鎖舌＋手動保險滑栓"], ["p10", "L4", "金屬補強軌條／嵌件"]]],
+    ["組合", [["ca", "RA", "雙軌主從軌＋中央柱塞拉環", true], ["cb", "RB", "單軌撓性懸臂＋金屬彈片"], ["cc", "RC", "外八大鳩尾＋雙鎖舌＋保險滑栓"]]]
+  ];
+  const EDGE = [
+    [null, [["e1", "E1", "分段卡緣＋落下短滑", true], ["e2", "E2", "角落勾＋落下短滑", true], ["e3", "E3", "側壁 L 形槽＋側銷", true],
+      ["e4", "E4", "楔形卡緣＋落下短滑", true], ["e5", "E5", "上緣連續卡緣斜插＋下緣分段短滑", true], ["e6", "E6", "雙段落下短滑（兩階段鎖）", true]]]
+  ];
+  function rows(groups, page2d, page3d) {
+    return groups.map(([label, list]) =>
+      (label ? `<tr class="grp"><td colspan="3">${label}</td></tr>` : "") +
+      list.map(([id, no, name, has3d]) => `<tr><td class="num">${no}</td><td>${name}</td><td class="lk"><a href="${page2d}#${id}">2D</a>` +
+        (has3d ? `<a href="${page3d}#${id}">3D</a>` : `<span class="pend">3D 預留</span>`) + `</td></tr>`).join("")
+    ).join("");
+  }
+  document.getElementById("idx-rail").innerHTML = rows(RAIL, "rail.html", "rail-3d.html");
+  document.getElementById("idx-edge").innerHTML = rows(EDGE, "edge.html", "edge-3d.html");
+})();
+</script>
+</body>
+</html>

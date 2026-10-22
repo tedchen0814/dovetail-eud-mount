@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>胸掛 EUD 邊緣卡合提案</title>
+<title>邊緣卡合提案</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -171,6 +171,16 @@ footer { font-size: 12.5px; color: var(--muted); }
 .s-tablet { fill: var(--tablet); fill-opacity: .4; stroke: var(--tablet-dark); stroke-width: 1.5; }
 .s-plate { fill: var(--plate); fill-opacity: .7; stroke: var(--plate-dark); stroke-width: 1.5; }
 
+
+.sitenav { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.sitenav a { color: var(--ink); text-decoration: none; padding: 3px 10px; border-radius: 6px; white-space: nowrap; }
+.sitenav a:hover { background: var(--panel); }
+.sitenav a[aria-current="page"] { background: var(--chip-on); color: var(--chip-on-fg); }
+.sitenav .brand { font-family: var(--font-display); font-weight: 600; padding-left: 0; margin-right: auto; }
+.sitenav .brand:hover { background: none; text-decoration: underline; }
+.navgrp { display: flex; gap: 2px; align-items: center; }
+.navlbl { color: var(--muted); font-size: 12.5px; margin-right: 4px; }
+.go3d { color: var(--accent); font-size: 14px; font-weight: 500; }
 @media (max-width: 860px) {
   .views { grid-template-columns: minmax(0, 1fr); }
   .info { grid-template-columns: minmax(0, 1fr); }
@@ -179,10 +189,15 @@ footer { font-size: 12.5px; color: var(--muted); }
 </head>
 <body>
 <div class="wrap">
+  <nav class="sitenav" aria-label="網站導覽">
+    <a class="brand" href="./">胸掛 EUD 快拆提案</a>
+    <div class="navgrp"><span class="navlbl">中央軌道</span><a href="rail.html">2D 結構</a><a href="rail-3d.html">3D</a></div>
+    <div class="navgrp"><span class="navlbl">邊緣卡合</span><a href="edge.html" aria-current="page">2D 結構</a><a href="edge-3d.html">3D</a></div>
+  </nav>
   <header>
-    <div class="eyebrow">Chest Mount × 5" EUD · Edge interlock · Drop &amp; slide</div>
-    <h1>胸掛 EUD 邊緣卡合：落下短滑 6 個提案</h1>
-    <p class="lede">平板和背板大小差不多（背板稍大），卡合做在兩者的<b>邊緣</b>，參考 NP-F 電池：<b>先垂直放下、再往左滑一小段</b>就咬合，每個提案都有 lock。左邊是正視圖（面向背板，平板半透明）；右上是側視圖（從下緣看，看「放下」和「滑動」）；右下是 A–A 剖面（看邊緣怎麼勾住）。每個提案的 lock 另有 <a href="https://dovetail-eud-mount.vercel.app/edge-lock-3d.html">Lock 3D 說明 →</a>；前一輪中央軌道的提案在 <a href="https://dovetail-eud-mount.vercel.app/">鳩尾槽 10 提案 →</a></p>
+    <div class="eyebrow">Direction 2 · Edge interlock · Drop &amp; slide</div>
+    <h1>方向二　邊緣卡合：6 個提案</h1>
+    <p class="lede">平板和背板邊緣互卡，參考 NP-F 電池：<b>先垂直放下、再由右往左短滑</b>就咬合，每個提案都含 lock。左邊正視圖（平板半透明），右上側視圖（看放下與滑動），右下 A–A 剖面（看邊緣怎麼勾住）。</p>
   </header>
 
   <nav class="picker" aria-label="選擇提案" id="picker"></nav>
@@ -222,18 +237,18 @@ footer { font-size: 12.5px; color: var(--muted); }
       <table>
         <thead><tr><th>#</th><th>方案</th><th>裝上動作</th><th>抗翻轉</th><th>裝卸速度</th><th>盲裝</th><th>側邊佔用少</th><th>Lock</th></tr></thead>
         <tbody>
-          <tr><td class="num">1</td><td>分段卡緣＋落下短滑</td><td>放下＋滑</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td>彈片自動卡扣</td></tr>
-          <tr><td class="num">2</td><td>角落勾＋落下短滑</td><td>放下＋滑</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●●</td><td>中央柱塞＋拉環</td></tr>
-          <tr><td class="num">3</td><td>側壁 L 形槽＋側銷</td><td>放下＋滑</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●○○</td><td>旋轉擋片</td></tr>
-          <tr><td class="num">4</td><td>楔形卡緣＋落下短滑</td><td>放下＋滑（漸緊）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>楔形自鎖＋側推滑鈕</td></tr>
-          <tr><td class="num">5</td><td>上緣斜插＋下緣短滑</td><td>斜插＋壓下＋滑</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●○○</td><td class="dots">●○○</td><td>下緣按壓卡扣</td></tr>
-          <tr><td class="num">6</td><td>雙段落下短滑 ★</td><td>放下＋滑（兩段）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>卡扣＋保險滑鈕</td></tr>
+          <tr><td class="num">E1</td><td>分段卡緣＋落下短滑</td><td>放下＋滑</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td>彈片自動卡扣</td></tr>
+          <tr><td class="num">E2</td><td>角落勾＋落下短滑</td><td>放下＋滑</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●●</td><td>中央柱塞＋拉環</td></tr>
+          <tr><td class="num">E3</td><td>側壁 L 形槽＋側銷</td><td>放下＋滑</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●●</td><td class="dots">●○○</td><td>旋轉擋片</td></tr>
+          <tr><td class="num">E4</td><td>楔形卡緣＋落下短滑</td><td>放下＋滑（漸緊）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>楔形自鎖＋側推滑鈕</td></tr>
+          <tr><td class="num">E5</td><td>上緣斜插＋下緣短滑</td><td>斜插＋壓下＋滑</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●○○</td><td class="dots">●○○</td><td>下緣按壓卡扣</td></tr>
+          <tr><td class="num">E6</td><td>雙段落下短滑 ★</td><td>放下＋滑（兩段）</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●●○</td><td class="dots">●●○</td><td>卡扣＋保險滑鈕</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <footer>Claude 2026-10-22 整理的設計概念，不是定案設計，也還沒經過驗證。本頁只比較結構與操作，不含製程、材料、熱膨脹、衝擊強度。完整說明見 <code>胸掛EUD邊緣卡合_落下短滑提案.md</code>。</footer>
+  <footer>Claude 2026-10-22 整理的設計概念，不是定案設計，也還沒驗證；尺寸為估算，不含製程、材料、熱膨脹與強度評估。</footer>
 </div>
 
 <script>
@@ -248,44 +263,44 @@ footer { font-size: 12.5px; color: var(--muted); }
 
   /* ---------- 資料 ---------- */
   const ITEMS = [
-    { id: "e1", no: "1", name: "分段卡緣＋落下短滑", short: "分段卡緣（NP-F 型）",
+    { id: "e1", no: "E1", name: "分段卡緣＋落下短滑", short: "分段卡緣（NP-F 型）",
       cfg: { motion: "drop", top: SEGS4, bot: SEGS4, lock: "snap", plane: 255 },
       struct: "背板上下長邊各 4 段往內折的卡緣；平板側壁有對應的分段凸緣，和卡緣錯開半個間距。左端有擋牆。",
       install: "平板垂直放下，凸緣落進卡緣之間的空檔；往左滑 15～20 mm，抵到擋牆，凸緣全部進到卡緣下方。",
       lock: "背板右端一片彈片自動卡扣：平板經過時被壓下，滑到底後彈起擋住平板右緣（喀一聲）。按下卡扣才能往右退。",
       pros: ["行程短、單手好裝", "上下兩條長邊都分擔負載，抗翻轉力臂約 85 mm"],
-      cons: ["只有一個卡扣，被誤觸就會解鎖（需要保險的話看提案 6）"] },
-    { id: "e2", no: "2", name: "角落勾＋落下短滑", short: "角落勾＋中央柱塞",
+      cons: ["只有一個卡扣，被誤觸就會解鎖（需要保險的話看 E6）"] },
+    { id: "e2", no: "E2", name: "角落勾＋落下短滑", short: "角落勾＋中央柱塞",
       cfg: { motion: "drop", top: CORNERS, bot: CORNERS, lock: "plunger", plane: 134 },
       struct: "卡緣只放在背板四個角落，各 15～20 mm 長；長邊中段完全不碰平板。",
-      install: "和提案 1 相同：放下後往左滑約 15 mm，四個角的凸緣鑽進角落勾下面。",
+      install: "和 E1 相同：放下後往左滑約 15 mm，四個角的凸緣鑽進角落勾下面。",
       lock: "中央彈簧柱塞＋拉環（沿用前一輪組合 A）：滑到底時柱塞自動彈進平板中央的定位孔；往右拉背板右緣的拉環，柱塞縮回。",
       pros: ["平板側邊被包住的部分最少，按鍵和 I/O 好安排", "柱塞藏在平板下方，不會被勾到"],
       cons: ["四個角承受全部負載，角落勾要做厚", "長邊中段沒有拘束，平板中段可能微微翹"] },
-    { id: "e3", no: "3", name: "側壁 L 形槽＋側銷（J-slot）", short: "L 形槽＋側銷",
+    { id: "e3", no: "E3", name: "側壁 L 形槽＋側銷（J-slot）", short: "L 形槽＋側銷",
       cfg: { motion: "drop", pins: PINS, lock: "flap", plane: 320 },
       struct: "背板上下兩側立起側牆，牆上開 L 形槽（先垂直往下、再水平往左）；平板側邊各有 3 支短銷。",
       install: "側銷對準槽口放下，滑到底後往左推，側銷進到水平段。",
       lock: "槽口加一片旋轉擋片：平板到位後撥下擋片封住垂直段，側銷就退不回去。也可以在水平段末端加彈性凸點止退。",
       pros: ["槽口本身會導正位置，盲裝最容易", "銷子是點接觸，滑動阻力小"],
       cons: ["側牆要比卡緣高，背板變成淺盒狀", "擋片是手動上鎖，忘了撥就沒有鎖"] },
-    { id: "e4", no: "4", name: "楔形卡緣＋落下短滑", short: "楔形卡緣（自鎖預壓）",
+    { id: "e4", no: "E4", name: "楔形卡緣＋落下短滑", short: "楔形卡緣（自鎖預壓）",
       cfg: { motion: "drop", top: SEGS4, bot: SEGS4, wedge: true, lock: "bolt", plane: 255 },
-      struct: "和提案 1 一樣是分段卡緣，但卡緣底面與平板凸緣頂面做成沿滑動方向的小斜坡（約 3°～5°）。",
+      struct: "和 E1 一樣是分段卡緣，但卡緣底面與平板凸緣頂面做成沿滑動方向的小斜坡（約 3°～5°）。",
       install: "放下後往左滑，斜坡一路把平板往背板拉緊，滑到底時沒有間隙、不會晃。",
       lock: "楔形本身提供摩擦自鎖，再加一個側推滑鈕：拇指把滑鈕推過去，擋塊插到平板右緣後方。",
       pros: ["不靠凸點或彈片就能消除晃動", "咬合感最紮實"],
       cons: ["取出時第一下要克服楔形摩擦", "斜坡角度太小會卡死，太大則自鎖力不足"] },
-    { id: "e5", no: "5", name: "上緣連續卡緣斜插＋下緣分段短滑", short: "上緣斜插＋下緣短滑",
+    { id: "e5", no: "E5", name: "上緣連續卡緣斜插＋下緣分段短滑", short: "上緣斜插＋下緣短滑",
       cfg: { motion: "tiltTop", top: [[114, 520]], topLedge: [[120, 500]], bot: [[200, 250], [380, 430]], lock: "snapB", plane: 225 },
       struct: "上緣一條全長連續卡緣，下緣 2 段短卡緣。",
       install: "平板下緣翹起，上緣斜插進連續卡緣下面；壓下下緣貼平背板（下緣凸緣落在短卡緣之間），再往左滑約 15 mm。",
       lock: "下緣中段一個按壓式卡扣：滑到底後彈起，擋住下緣凸緣往右退。手指從下緣伸進去按下就放開。",
       pros: ["上緣全長承力、負責定位；下緣負責防脫和鎖定，分工清楚"],
-      cons: ["裝上有斜插、壓下、滑動三個動作，比提案 1 多一步", "上緣被連續卡緣包住，上緣不能放按鍵"] },
-    { id: "e6", no: "6", name: "雙段落下短滑（兩階段鎖）", short: "雙段落下短滑", star: true,
+      cons: ["裝上有斜插、壓下、滑動三個動作，比 E1 多一步", "上緣被連續卡緣包住，上緣不能放按鍵"] },
+    { id: "e6", no: "E6", name: "雙段落下短滑（兩階段鎖）", short: "雙段落下短滑", star: true,
       cfg: { motion: "drop2", top: SEGS4, bot: SEGS4, lock: "snap", safety: true, plane: 255 },
-      struct: "和提案 1 相同的分段卡緣，但咬合分兩段：滑約 10 mm 先半咬合，滑到 20 mm 才全咬合。",
+      struct: "和 E1 相同的分段卡緣，但咬合分兩段：滑約 10 mm 先半咬合，滑到 20 mm 才全咬合。",
       install: "放下、往左滑。半咬合時有一個彈性凸點暫停位，這時平板已經不會掉；繼續滑到底，彈片卡扣自動彈起；最後推上保險滑鈕。",
       lock: "主鎖是右端彈片自動卡扣，副鎖是保險滑鈕：推上後卡扣按不下去。取出時先撥下保險滑鈕、再按卡扣。",
       pros: ["沒有完全鎖好也不會直接掉", "保險滑鈕防止在胸前被裝備誤壓解鎖", "手感最接近 NP-F"],
@@ -558,9 +573,9 @@ footer { font-size: 12.5px; color: var(--muted); }
       e1: "剖面在卡緣位置：L 形卡緣蓋住平板凸緣",
       e2: "剖面在角落勾位置",
       e3: "剖面在側銷位置：側銷伸進側牆的 L 形槽",
-      e4: "斷面同提案 1；楔形斜坡沿滑動方向（看側視圖）",
+      e4: "斷面同 E1；楔形斜坡沿滑動方向（看側視圖）",
       e5: "上緣先斜插進卡緣，再以上緣為支點壓下下緣",
-      e6: "斷面同提案 1；差別在兩段咬合與暫停位"
+      e6: "斷面同 E1；差別在兩段咬合與暫停位"
     };
     const it = ITEMS.find(i => i.cfg === cfg);
     o.push(tx(210, 210, note[it.id], "lbl sm", "middle"));
@@ -583,7 +598,7 @@ footer { font-size: 12.5px; color: var(--muted); }
   });
 
   function renderInfo(it) {
-    infoEl.innerHTML = `<h2><span class="tag">提案 ${it.no}</span>${it.name}${it.star ? ' <span class="tag" style="color:var(--accent)">★ 建議</span>' : ""}</h2>
+    infoEl.innerHTML = `<h2><span class="tag">${it.no}</span>${it.name}${it.star ? ' <span class="tag" style="color:var(--accent)">★ 建議</span>' : ""}<a class="go3d" href="edge-3d.html#${it.id}">看 Lock 3D →</a></h2>
       <section><h3>結構</h3><p>${it.struct}</p></section>
       <section><h3>裝上</h3><p>${it.install}</p></section>
       <section class="wide"><h3>Lock</h3><p>${it.lock}</p></section>
