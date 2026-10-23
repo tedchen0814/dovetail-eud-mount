@@ -6,3 +6,6 @@ dist/
 圖片*.png
 cad/out/
 __pycache__/
+
+.vercel
+.env*
